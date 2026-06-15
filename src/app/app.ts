@@ -1,12 +1,22 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { DxButtonModule } from 'devextreme-angular';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  imports: [DxButtonModule],
+  template: `
+    <div style="padding: 40px;">
+      <h1>REMS Frontend</h1>
+      <dx-button
+        text="DevExtreme is working"
+        type="default"
+        (onClick)="clicked()">
+      </dx-button>
+    </div>
+  `,
 })
 export class App {
-  protected readonly title = signal('rems-frontend');
+  clicked() {
+    alert('Setup complete!');
+  }
 }
