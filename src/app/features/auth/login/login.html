@@ -1,0 +1,23 @@
+<div class="login-container">
+    <div class="login-card">
+        <h2>PRMS Sign In</h2>
+
+        <label>Email</label>
+        <dx-text-box [(value)]="email" placeholder="you@example.com" mode="email"></dx-text-box>
+
+        <label>Password</label>
+        <dx-text-box [(value)]="password" placeholder="Your password" mode="password"></dx-text-box>
+
+        @if (errorMessage()) {
+            <p class="error"> errorMessage() </p>
+        }
+
+        <dx-button
+            text="Sign In"
+            type="default"
+            width="100%"
+            [disabled]="loading()"
+            (onClick)="onLogin()">
+        </dx-button>
+    </div>
+</div>

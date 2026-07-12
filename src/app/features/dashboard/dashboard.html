@@ -1,0 +1,9 @@
+<div class="dashboard">
+    <h1>Welcome to PRMS</h1>
+
+    @if (user()) {
+        <p>Signed in as  user()!.name  ( user()!.role )</p>
+    }
+
+    <dx-button text="Log out" type="normal" (onClick)="onLogout()"></dx-button>
+</div>
