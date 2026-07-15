@@ -14,8 +14,6 @@
             [allowDeleting]="true">
         </dxo-editing>
 
-        <dxi-column dataField="id" caption="ID" [width]="70" [allowEditing]="false"></dxi-column>
-
         <dxi-column dataField="fname" caption="First Name">
             <dxi-validation-rule type="required"></dxi-validation-rule>
         </dxi-column>
@@ -31,4 +29,6 @@
 
         <dxi-column dataField="phone" caption="Phone"></dxi-column>
     </dx-data-grid>
+
+    <dx-button (onClick)="goToDash()"></dx-button>
 </div>

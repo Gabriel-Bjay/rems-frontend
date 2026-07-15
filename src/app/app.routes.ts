@@ -7,16 +7,22 @@ export const routes: Routes = [
         loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
     },
     {
-        path: 'dashboard',
+        path: '',
+        loadComponent: () => import('./layout/layout').then((m) => m.Layout),
         canActivate: [authGuard],
-        loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
+        children: [
+            {
+                path: 'dashboard',
+                loadComponent: () =>
+                    import('./features/dashboard/dashboard').then((m) => m.Dashboard),
+            },
+            {
+                path: 'owners',
+                loadComponent: () =>
+                    import('./features/owners/owners-list/owners-list').then((m) => m.OwnersList),
+            },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+        ],
     },
-    {
-        path: 'owners',
-        canActivate: [authGuard],
-        loadComponent: () =>
-            import('./features/owners/owners-list/owners-list').then((m) => m.OwnersList),
-    },
-    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-    { path: '**', redirectTo: 'dashboard' },
+    { path: '**', redirectTo: '' },
 ];
