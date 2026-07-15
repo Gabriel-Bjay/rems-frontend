@@ -1,0 +1,14 @@
+<div class="page">
+    <h1>Owners</h1>
+
+    <dx-data-grid
+        [dataSource]="dataSource"
+        [showBorders]="true"
+        [columnAutoWidth]="true">
+        <dxi-column dataField="id" caption="ID" [width]="70"></dxi-column>
+        <dxi-column dataField="name" caption="Name"></dxi-column>
+        <dxi-column dataField="email" caption="Email"></dxi-column>
+        <dxi-column dataField="phone" caption="Phone"></dxi-column>
+    </dx-data-grid>
+    <dx-button text="Return" (onClick)="goToDash()"></dx-button>
+</div>

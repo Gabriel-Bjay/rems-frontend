@@ -22,4 +22,8 @@ export class Dashboard {
             error: () => this.router.navigate(['/login']),
         });
     }
+
+    goToOwners() {
+        this.router.navigate(['/owners']);
+    }
 }
