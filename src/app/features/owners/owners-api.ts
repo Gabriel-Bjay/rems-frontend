@@ -13,7 +13,7 @@ export class OwnersApi {
         return new CustomStore({
             key: 'id',
             load: () => firstValueFrom(this.http.get<any[]>(this.apiUrl)),
-
+            byKey: (key) => firstValueFrom(this.http.get<any>(`${this.apiUrl}/${key}`)),
             insert: (values) =>
                 firstValueFrom(this.http.post(this.apiUrl, values)),
 

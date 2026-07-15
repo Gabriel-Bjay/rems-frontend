@@ -13,6 +13,7 @@ export class PropertiesApi {
         return new CustomStore({
             key: 'id',
             load: () => firstValueFrom(this.http.get<any[]>(this.apiUrl)),
+            byKey: (key) => firstValueFrom(this.http.get<any>(`${this.apiUrl}/${key}`)),
             insert: (values) => firstValueFrom(this.http.post(this.apiUrl, values)),
             update: async (key, values) => {
                 const current = await firstValueFrom(this.http.get<any>(`${this.apiUrl}/${key}`));
