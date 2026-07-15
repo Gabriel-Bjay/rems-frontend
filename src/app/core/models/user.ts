@@ -1,6 +1,7 @@
 export interface User {
     id: string;
-    name: string;
+    fname: string;
+    lname: string;
     email: string;
     role: 'admin' | 'owner' | 'agent' | 'tenant';
     status: 'pending' | 'active' | 'suspended';

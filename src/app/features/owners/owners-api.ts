@@ -13,6 +13,21 @@ export class OwnersApi {
         return new CustomStore({
             key: 'id',
             load: () => firstValueFrom(this.http.get<any[]>(this.apiUrl)),
+
+            insert: (values) =>
+                firstValueFrom(this.http.post(this.apiUrl, values)),
+
+            update: async (key, values) => {
+                const current = await firstValueFrom(
+                    this.http.get<any>(`${this.apiUrl}/${key}`)
+                );
+                const merged = { ...current, ...values };
+                return firstValueFrom(this.http.put(`${this.apiUrl}/${key}`, merged));
+            },
+
+            remove: (key) =>
+                firstValueFrom(this.http.delete<void>(`${this.apiUrl}/${key}`)),
+
         });
     }
 }
