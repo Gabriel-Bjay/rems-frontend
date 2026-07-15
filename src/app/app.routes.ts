@@ -21,6 +21,13 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/owners/owners-list/owners-list').then((m) => m.OwnersList),
             },
+            {
+                path: 'properties',
+                loadComponent: () =>
+                    import('./features/properties/properties-list/properties-list').then(
+                        (m) => m.PropertiesList
+                    ),
+            },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         ],
     },
