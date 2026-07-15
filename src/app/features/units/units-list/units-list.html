@@ -1,0 +1,39 @@
+<div class="page">
+    <h1>Units</h1>
+
+    <dx-data-grid
+        [dataSource]="dataSource"
+        [showBorders]="true"
+        [columnAutoWidth]="true">
+
+        <dxo-editing
+            mode="popup"
+            [allowAdding]="true"
+            [allowUpdating]="true"
+            [allowDeleting]="true">
+        </dxo-editing>
+
+        <dxi-column dataField="property_id" caption="Property">
+            <dxo-lookup [dataSource]="propertiesData" valueExpr="id" displayExpr="name"></dxo-lookup>
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+
+        <dxi-column dataField="name" caption="Name">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+
+        <dxi-column dataField="type" caption="Type">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+
+        <dxi-column dataField="base_rent" caption="Base rent" dataType="number">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+
+        <dxi-column dataField="status" caption="Status">
+            <dxo-lookup [dataSource]="statuses"></dxo-lookup>
+        </dxi-column>
+
+        <dxi-column dataField="description" caption="Description"></dxi-column>
+    </dx-data-grid>
+</div>

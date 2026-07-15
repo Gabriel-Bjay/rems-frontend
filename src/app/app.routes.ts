@@ -28,6 +28,11 @@ export const routes: Routes = [
                         (m) => m.PropertiesList
                     ),
             },
+            {
+                path: 'units',
+                loadComponent: () =>
+                    import('./features/units/units-list/units-list').then((m) => m.UnitsList),
+            },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         ],
     },
