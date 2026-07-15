@@ -1,0 +1,33 @@
+<div class="page">
+    <h1>Properties</h1>
+
+    <dx-data-grid
+        [dataSource]="dataSource"
+        [showBorders]="true"
+        [columnAutoWidth]="true">
+
+        <dxo-editing
+            mode="popup"
+            [allowAdding]="true"
+            [allowUpdating]="true"
+            [allowDeleting]="true">
+        </dxo-editing>
+
+        <dxi-column dataField="name" caption="Property name">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+
+        <dxi-column dataField="address" caption="Address">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+
+        <dxi-column dataField="owner_id" caption="Owner">
+            <dxo-lookup
+                [dataSource]="ownersData"
+                valueExpr="id"
+                [displayExpr]="ownerDisplay">
+            </dxo-lookup>
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+        </dxi-column>
+    </dx-data-grid>
+</div>
