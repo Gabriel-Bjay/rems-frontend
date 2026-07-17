@@ -1,2 +1,66 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'devextreme/dist/css/dx.light.css';
+
+:root {
+    --navy: #1f2a44;
+    --navy-2: #26324f;
+    --navy-active: #2f3d60;
+    --orange: #c05a1e;
+    --orange-hover: #a94d18;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #1f2a44;
+    --muted: #6b7688;
+    --border: #e6eaf1;
+    --row-hover: #f7f9fc;
+}
+
+html, body { margin: 0; }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Liberation Sans', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Page scaffolding reused by every feature screen */
+.page { padding: 28px; }
+.page-head { margin-bottom: 20px; }
+.page-head h1 { margin: 0; font-size: 24px; font-weight: 700; }
+.page-head p { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
+
+/* Card that wraps a grid */
+.grid-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(31, 42, 68, .05);
+    overflow: hidden;
+    padding: 8px 12px 12px;
+}
+.grid-title { font-size: 15px; font-weight: 700; color: var(--text); padding-left: 6px; }
+
+/* Initials avatar used inside a name cell */
+.person-cell { display: flex; align-items: center; gap: 12px; }
+.person-cell .pa {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--navy); color: #fff;
+    font-weight: 700; font-size: 12.5px; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.person-cell .pn { font-weight: 600; }
+
+/* DevExtreme DataGrid polish */
+.dx-datagrid { background: transparent; }
+.dx-datagrid-headers {
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .6px;
+    color: var(--muted);
+}
+.dx-datagrid .dx-row > td { padding-top: 12px; padding-bottom: 12px; }
+.dx-datagrid .dx-data-row:hover > td { background: var(--row-hover); }
+
+/* Brand the primary (Add / Save) buttons orange */
+.dx-button-mode-contained.dx-button-default { background: var(--orange); border-radius: 9px; }
+.dx-button-mode-contained.dx-button-default:hover { background: var(--orange-hover); }

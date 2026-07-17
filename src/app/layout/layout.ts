@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { DxButtonModule } from 'devextreme-angular';
 import { Auth } from '../core/services/auth';
@@ -15,6 +15,7 @@ export class Layout {
     private router = inject(Router);
 
     user = this.auth.currentUser;
+    initials = computed(() => (this.user()?.email ?? '?').slice(0, 2).toUpperCase());
 
     onLogout() {
         this.auth.logout().subscribe({

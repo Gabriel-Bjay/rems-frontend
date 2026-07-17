@@ -1,56 +1,65 @@
-.shell {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+:host {
+     display: block; 
 }
-.topbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    height: 56px;
-    padding: 0 16px;
-    background: #1f2a44;
-    color: #fff;
+.shell { 
+    display: flex; min-height: 100vh; 
 }
-.brand {
-    font-weight: 600;
+
+.sidebar {
+    width: 244px;
+    background: linear-gradient(180deg, var(--navy) 0%, #1a2338 100%);
+    color: #cdd4e0;
+    display: flex; flex-direction: column;
+    padding: 20px 14px;
+}
+.brand { 
+    display: flex;
+    align-items: center; 
+    gap: 12px; 
+    padding: 6px 10px 20px; 
+}
+.brand .logo {
+    width: 38px;
+    height: 38px; 
+    border-radius: 10px;
+    background: var(--orange); 
+    color: #fff; 
+    font-weight: 800; 
     font-size: 18px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(192, 90, 30, .35);
 }
-.spacer {
-    flex: 1;
+.brand .b-name { 
+    font-size: 19px; 
+    font-weight: 700; 
+    color: #fff; 
 }
-.user-email {
-    opacity: 0.85;
-    font-size: 14px;
+.brand .b-sub { font-size: 11px; color: #8b95a9; }
+.nav-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: #7d879b; margin: 8px 12px 6px; }
+.nav a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 9px;
+    color: #cdd4e0; text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: background .15s, color .15s;
 }
-.body {
-    display: flex;
-    flex: 1;
-    min-height: 0;
+.nav a svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.nav a:hover { background: var(--navy-2); color: #fff; }
+.nav a.active { background: var(--navy-active); color: #fff; box-shadow: inset 3px 0 0 var(--orange); }
+.spacer { flex: 1; }
+.userbox { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(255, 255, 255, .05); }
+.userbox .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--orange); color: #fff; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.sidenav {
-    width: 200px;
-    background: #f5f6f8;
-    border-right: 1px solid #e0e0e0;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.userbox .u-mail { font-size: 12px; color: #cdd4e0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar {
+    height: 60px; background: #fff; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 20px;
 }
-.sidenav a {
-    padding: 8px 12px;
-    border-radius: 6px;
-    color: #333;
-    text-decoration: none;
-}
-.sidenav a:hover {
-    background: #e9ebef;
-}
-.sidenav a.active {
-    background: #c05a1e;
-    color: #fff;
-}
-.content {
-    flex: 1;
-    overflow: auto;
-}
+.t-spacer { flex: 1; }
+.content-area { flex: 1; overflow: auto; }
