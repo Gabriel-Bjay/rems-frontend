@@ -18,6 +18,10 @@
             <dxi-validation-rule type="required"></dxi-validation-rule>
         </dxi-column>
 
+        <dxi-column dataField="agent_id" caption="Agent">
+            <dxo-lookup [dataSource]="agentsData" valueExpr="id" [displayExpr]="agentDisplay"></dxo-lookup>
+        </dxi-column>
+
         <dxi-column dataField="name" caption="Name">
             <dxi-validation-rule type="required"></dxi-validation-rule>
         </dxi-column>
