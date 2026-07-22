@@ -24,7 +24,6 @@ export class Layout {
     user = this.auth.currentUser;
     role = this.auth.role;
 
-    // The complete menu. Each item declares which roles may see it.
     private allNav: NavItem[] = [
         { label: 'Dashboard',  route: '/dashboard',  icon: 'M3 12l9-8 9 8M5 10v9h14v-9', roles: ['admin', 'owner', 'agent', 'tenant'] },
         { label: 'Properties', route: '/properties', icon: 'M4 21V6l8-3 8 3v15M9 10h2M9 14h2M13 10h2M13 14h2', roles: ['admin', 'owner', 'agent'] },
@@ -35,13 +34,11 @@ export class Layout {
         { label: 'Tenants',    route: '/tenants',    icon: 'M2 20a6 6 0 0112 0M8 11a3 3 0 100-6 3 3 0 000 6M15 8a3 3 0 110 6M14 20a6 6 0 018-5.7', roles: ['admin'] },
     ];
 
-    // Only the items allowed for the current role.
     nav = computed(() => {
         const current = this.role();
         return current ? this.allNav.filter((item) => item.roles.includes(current)) : [];
     });
 
-    // Initials from the user's name, now that we know users have a single name.
     initials = computed(() => {
         const name = this.user()?.name ?? '';
         const parts = name.trim().split(/\s+/);
