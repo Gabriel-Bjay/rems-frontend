@@ -55,6 +55,8 @@
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .userbox .u-mail { font-size: 12px; color: #cdd4e0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.userbox .u-name { font-size: 13px; font-weight: 600; color: #fff; }
+.userbox .u-role { font-size: 12px; color: rgba(255, 255, 255, 0.6); text-transform: capitalize; }
 
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .topbar {
