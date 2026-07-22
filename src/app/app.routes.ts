@@ -38,6 +38,11 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/agents/agents-list/agents-list').then((m) => m.AgentsList),
             },
+            {
+                path: 'tenants',
+                loadComponent: () =>
+                    import('./features/tenants/tenants-list/tenants-list').then((m) => m.TenantsList),
+            },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         ],
     },

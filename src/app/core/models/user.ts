@@ -1,10 +1,12 @@
+export type Role = 'admin' | 'owner' | 'agent' | 'tenant';
+export type UserStatus = 'pending' | 'active' | 'suspended';
+
 export interface User {
-    id: string;
-    fname: string;
-    lname: string;
+    id: number;
+    name: string;
     email: string;
-    role: 'admin' | 'owner' | 'agent' | 'tenant';
-    status: 'pending' | 'active' | 'suspended';
+    role: Role;
+    status: UserStatus;
 }
 
 export interface LoginResponse {

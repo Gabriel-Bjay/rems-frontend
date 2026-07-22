@@ -1,0 +1,52 @@
+<div class="page">
+    <div class="page-head">
+        <h1>Tenants</h1>
+        <p>Manage the people renting your units.</p>
+    </div>
+
+    <div class="grid-card">
+        <dx-data-grid
+            [dataSource]="dataSource"
+            [showBorders]="false"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true">
+
+            <dxo-search-panel [visible]="true" [width]="260" placeholder="Search tenants..."></dxo-search-panel>
+            <dxo-paging [pageSize]="10"></dxo-paging>
+            <dxo-pager [visible]="true" [showInfo]="true" infoText="Showing {2} tenants"></dxo-pager>
+
+            <dxo-editing mode="popup" [allowAdding]="true" [allowUpdating]="true" [allowDeleting]="true" [useIcons]="true">
+                <dxo-texts addRow="Add tenant"></dxo-texts>
+            </dxo-editing>
+
+            <dxo-toolbar>
+                <dxi-item location="before" template="titleTemplate"></dxi-item>
+                <dxi-item name="searchPanel" location="after"></dxi-item>
+                <dxi-item name="addRowButton" [showText]="'always'" location="after"></dxi-item>
+            </dxo-toolbar>
+
+            <div *dxTemplate="let data of 'titleTemplate'" class="grid-title">All tenants</div>
+
+            <dxi-column caption="Tenant" [allowEditing]="false" cellTemplate="tenantCell" [calculateCellValue]="fullName"></dxi-column>
+
+            <dxi-column dataField="fname" caption="First name" [visible]="false">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+            <dxi-column dataField="lname" caption="Last name" [visible]="false">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column dataField="email" caption="Email">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+                <dxi-validation-rule type="email"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column dataField="phone" caption="Phone"></dxi-column>
+
+            <div *dxTemplate="let cell of 'tenantCell'" class="person-cell">
+                <div class="pa">{{ initials(cell.data) }}</div>
+                <span class="pn">{{ cell.data.fname }} {{ cell.data.lname }}</span>
+            </div>
+        </dx-data-grid>
+    </div>
+</div>

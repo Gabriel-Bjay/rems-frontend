@@ -1,10 +1,63 @@
-<div class="dashboard">
-    <h1>Welcome to PRMS</h1>
+<div class="page">
+    <div class="page-head">
+        <h1>Dashboard</h1>
+        <p>An overview of registered properties, units, and tenancies.</p>
+    </div>
 
-    @if (user()) {
-        <p>Signed in as  {{user()!.fname}} </p>
+    @if (loading()) {
+        <div class="dash-loading">Loading your data...</div>
+    } @else {
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-label">Properties</div>
+                <div class="stat-value">{{ propertyCount() }}</div>
+                <a class="stat-link" routerLink="/properties">View all</a>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Units</div>
+                <div class="stat-value">{{ unitCount() }}</div>
+                <div class="stat-breakdown">
+                    <span class="pill vacant">{{ vacantCount() }} vacant</span>
+                    <span class="pill occupied">{{ occupiedCount() }} occupied</span>
+                    <span class="pill maint">{{ maintenanceCount() }} maintenance</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Tenants</div>
+                <div class="stat-value">{{ tenantCount() }}</div>
+                <a class="stat-link" routerLink="/tenants">View all</a>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Active tenancies</div>
+                <!-- <div class="stat-value">{{ activeTenancyCount() }}</div> -->
+                <a class="stat-link" routerLink="/tenancies">View all</a>
+            </div>
+        </div>
+
+        <!-- <div class="grid-card recent">
+            <div class="grid-title">Recent tenancies</div>
+            @if (recentTenancies().length === 0) {
+                <div class="empty">No tenancies yet.</div>
+            } @else {
+                <table class="recent-table">
+                    <thead>
+                        <tr><th>Unit</th><th>Tenant</th><th>Start date</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @for (t of recentTenancies(); track t.id) {
+                            <tr>
+                                <td>{{ t.unit }}</td>
+                                <td>{{ t.tenant }}</td>
+                                <td>{{ t.start_date }}</td>
+                                <td><span class="status-chip {{ t.status }}">{{ t.status }}</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div> -->
     }
-
-    <dx-button text="Log out" type="normal" (onClick)="onLogout()"></dx-button>
-    <dx-button text="Manage Owners" type="default" (onClick)="goToOwners()"></dx-button>
 </div>
