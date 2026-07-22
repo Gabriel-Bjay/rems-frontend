@@ -13,10 +13,8 @@ export class Auth {
     private tokenKey = 'rems_token';
     private userKey = 'rems_user';
 
-    // The signed-in user, restored from storage so a refresh does not forget them.
     readonly currentUser = signal<User | null>(this.readStoredUser());
 
-    // Simple views of the user's role for the rest of the app to read.
     readonly role = computed(() => this.currentUser()?.role ?? null);
     readonly isAdmin = computed(() => this.role() === 'admin');
     readonly isOwner = computed(() => this.role() === 'owner');
@@ -24,7 +22,6 @@ export class Auth {
     readonly isTenant = computed(() => this.role() === 'tenant');
     readonly isLoggedIn = computed(() => this.currentUser() !== null);
 
-    // Log in, then remember both the token and the full user.
     async login(email: string, password: string): Promise<User> {
         const res = await firstValueFrom(
             this.http.post<LoginResponse>(`${environment.apiUrl}/login`, { email, password })
