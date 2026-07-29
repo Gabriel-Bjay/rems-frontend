@@ -15,11 +15,12 @@ export class Auth {
 
     readonly currentUser = signal<User | null>(this.readStoredUser());
 
-    readonly role = computed(() => this.currentUser()?.role ?? null);
-    readonly isAdmin = computed(() => this.role() === 'admin');
-    readonly isOwner = computed(() => this.role() === 'owner');
-    readonly isAgent = computed(() => this.role() === 'agent');
-    readonly isTenant = computed(() => this.role() === 'tenant');
+    readonly roles = computed(() => this.currentUser()?.roles ?? []);
+    readonly isAdmin = computed(() => this.roles().includes('admin'));
+    readonly isOwner = computed(() => this.roles().includes('owner'));
+    readonly isAgent = computed(() => this.roles().includes('agent'));
+    readonly isTenant = computed(() => this.roles().includes('tenant'));
+
     readonly isLoggedIn = computed(() => this.currentUser() !== null);
 
     async login(email: string, password: string): Promise<User> {
