@@ -35,9 +35,10 @@ export class Auth {
     async logout(): Promise<void> {
         try {
             await firstValueFrom(this.http.post(`${environment.apiUrl}/logout`, {}));
-        } catch {}
+        } catch {
             this.clearSession();
             this.router.navigateByUrl('/login');
+        }
     }
 
     // Re-confirm the user from the API, useful on a hard refresh.

@@ -19,19 +19,17 @@ export class Login {
     errorMessage = signal<string | null>(null);
     loading = signal(false);
 
-    onLogin() {
+    async onLogin() {
         this.errorMessage.set(null);
-        this.loading.set(true);
+        this.loading.set(false);
 
-        this.auth.login(this.email, this.password).subscribe({
-            next: () => {
-                this.loading.set(false);
-                this.router.navigate(['/dashboard']);
-            },
-            error: () => {
-                this.loading.set(false);
-                this.errorMessage.set('Invalid email or password.');
-            },
-        });
+        try {
+            await this.auth.login(this.email, this.password);
+            this.loading.set(false);
+            this.router.navigate(['/dashboard']);
+        } catch {
+            this.loading.set(false);
+            this.errorMessage.set('Invalid email or password.');
+        }
     }
 }

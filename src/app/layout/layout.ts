@@ -25,7 +25,7 @@ export class Layout {
     role = this.auth.role;
 
     private allNav: NavItem[] = [
-        { label: 'Dashboard',  route: '/dashboard',  icon: 'M3 12l9-8 9 8M5 10v9h14v-9', roles: ['admin', 'owner', 'agent', 'tenant'] },
+        { label: 'Dashboard',  route: '/dashboard',  icon: 'M3 12l9-8 9 8M5 10v9h14v-9', roles: [ 'owner', 'agent', 'tenant'] },
         { label: 'Properties', route: '/properties', icon: 'M4 21V6l8-3 8 3v15M9 10h2M9 14h2M13 10h2M13 14h2', roles: ['admin', 'owner', 'agent'] },
         { label: 'Units',      route: '/units',      icon: 'M4 4h16v16H4zM4 12h16M12 4v16', roles: ['admin', 'owner', 'agent'] },
         { label: 'Tenancies',  route: '/tenancies',  icon: 'M6 2h9l5 5v15H6zM14 2v6h6', roles: ['admin', 'owner', 'agent'] },
