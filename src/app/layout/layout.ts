@@ -22,7 +22,7 @@ export class Layout {
     private auth = inject(Auth);
 
     user = this.auth.currentUser;
-    role = this.auth.role;
+    role = this.auth.roles;
 
     private allNav: NavItem[] = [
         { label: 'Dashboard',  route: '/dashboard',  icon: 'M3 12l9-8 9 8M5 10v9h14v-9', roles: [ 'owner', 'agent', 'tenant'] },
@@ -35,8 +35,11 @@ export class Layout {
     ];
 
     nav = computed(() => {
-        const current = this.role();
-        return current ? this.allNav.filter((item) => item.roles.includes(current)) : [];
+        const currentRoles = this.role();
+
+        return this.allNav.filter(item =>
+            item.roles.some(role => currentRoles.includes(role))
+        );
     });
 
     initials = computed(() => {

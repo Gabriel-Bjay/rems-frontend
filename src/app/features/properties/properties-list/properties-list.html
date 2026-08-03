@@ -1,33 +1,80 @@
 <div class="page">
-    <h1>Properties</h1>
+    <div class="page-head">
+        <h1>Properties</h1>
+        <p>Manage the properties available in the rental system.</p>
+    </div>
 
-    <dx-data-grid
-        [dataSource]="dataSource"
-        [showBorders]="true"
-        [columnAutoWidth]="true">
+    <div class="grid-card">
+        <dx-data-grid
+            [dataSource]="dataSource"
+            [showBorders]="false"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true">
 
-        <dxo-editing
-            mode="popup"
-            [allowAdding]="true"
-            [allowUpdating]="true"
-            [allowDeleting]="true">
-        </dxo-editing>
+            <dxo-search-panel
+                [visible]="true"
+                [width]="260"
+                placeholder="Search properties...">
+            </dxo-search-panel>
 
-        <dxi-column dataField="name" caption="Property name">
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-        </dxi-column>
+            <dxo-paging [pageSize]="10"></dxo-paging>
 
-        <dxi-column dataField="address" caption="Address">
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-        </dxi-column>
+            <dxo-pager
+                [visible]="true"
+                [showInfo]="true"
+                infoText="Showing {2} properties">
+            </dxo-pager>
 
-        <dxi-column dataField="owner_id" caption="Owner">
-            <dxo-lookup
-                [dataSource]="ownersData"
-                valueExpr="id"
-                [displayExpr]="ownerDisplay">
-            </dxo-lookup>
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-        </dxi-column>
-    </dx-data-grid>
+            <dxo-editing
+                mode="popup"
+                [allowAdding]="true"
+                [allowUpdating]="true"
+                [allowDeleting]="true"
+                [useIcons]="true">
+
+                <dxo-texts addRow="Add property"></dxo-texts>
+            </dxo-editing>
+
+            <dxo-toolbar>
+                <dxi-item
+                    location="before"
+                    template="titleTemplate">
+                </dxi-item>
+
+                <dxi-item
+                    name="searchPanel"
+                    location="after">
+                </dxi-item>
+
+                <dxi-item
+                    name="addRowButton"
+                    [showText]="'always'"
+                    location="after">
+                </dxi-item>
+            </dxo-toolbar>
+
+            <div *dxTemplate="let data of 'titleTemplate'" class="grid-title">
+                All properties
+            </div>
+
+            <dxi-column dataField="name" caption="Property name">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column dataField="address" caption="Address">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column dataField="owner_id" caption="Owner">
+                <dxo-lookup
+                    [dataSource]="ownersData"
+                    valueExpr="id"
+                    [displayExpr]="ownerDisplay">
+                </dxo-lookup>
+
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+
+        </dx-data-grid>
+    </div>
 </div>

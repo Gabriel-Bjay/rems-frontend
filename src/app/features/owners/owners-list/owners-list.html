@@ -1,34 +1,93 @@
-
 <div class="page">
-    <h1>Owners</h1>
+    <div class="page-head">
+        <h1>Owners</h1>
+        <p>Manage property owners and their contact information.</p>
+    </div>
 
-    <dx-data-grid
-        [dataSource]="dataSource"
-        [showBorders]="true"
-        [columnAutoWidth]="true">
+    <div class="grid-card">
+        <dx-data-grid
+            [dataSource]="dataSource"
+            [showBorders]="false"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true">
 
-        <dxo-editing
-            mode="popup"
-            [allowAdding]="true"
-            [allowUpdating]="true"
-            [allowDeleting]="true">
-        </dxo-editing>
+            <dxo-search-panel
+                [visible]="true"
+                [width]="260"
+                placeholder="Search owners...">
+            </dxo-search-panel>
 
-        <dxi-column dataField="fname" caption="First Name">
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-        </dxi-column>
+            <dxo-paging [pageSize]="10"></dxo-paging>
 
-        <dxi-column dataField="lname" caption="Last Name">
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-        </dxi-column>        
+            <dxo-pager
+                [visible]="true"
+                [showInfo]="true"
+                infoText="Showing {2} owners">
+            </dxo-pager>
 
-        <dxi-column dataField="email" caption="Email">
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-            <dxi-validation-rule type="email"></dxi-validation-rule>
-        </dxi-column>
+            <dxo-editing
+                mode="popup"
+                [allowAdding]="true"
+                [allowUpdating]="true"
+                [allowDeleting]="true"
+                [useIcons]="true">
 
-        <dxi-column dataField="phone" caption="Phone"></dxi-column>
-    </dx-data-grid>
+                <dxo-texts addRow="Add owner"></dxo-texts>
+            </dxo-editing>
 
-    <dx-button (onClick)="goToDash()"></dx-button>
+            <dxo-toolbar>
+                <dxi-item
+                    location="before"
+                    template="titleTemplate">
+                </dxi-item>
+
+                <dxi-item
+                    name="searchPanel"
+                    location="after">
+                </dxi-item>
+
+                <dxi-item
+                    name="addRowButton"
+                    [showText]="'always'"
+                    location="after">
+                </dxi-item>
+            </dxo-toolbar>
+
+            <div *dxTemplate="let data of 'titleTemplate'" class="grid-title">
+                All owners
+            </div>
+
+            <dxi-column
+                dataField="fname"
+                caption="First Name">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column
+                dataField="lname"
+                caption="Last Name">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column
+                dataField="email"
+                caption="Email">
+                <dxi-validation-rule type="required"></dxi-validation-rule>
+                <dxi-validation-rule type="email"></dxi-validation-rule>
+            </dxi-column>
+
+            <dxi-column
+                dataField="phone"
+                caption="Phone">
+            </dxi-column>
+
+        </dx-data-grid>
+    </div>
+
+    <dx-button
+        text="Back to Dashboard"
+        stylingMode="outlined"
+        icon="home"
+        (onClick)="goToDash()">
+    </dx-button>
 </div>

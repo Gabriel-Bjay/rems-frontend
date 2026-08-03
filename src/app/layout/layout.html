@@ -26,7 +26,7 @@
             <div class="avatar">{{ initials() }}</div>
             <div class="info">
                 <div class="u-name">{{ user()?.name }}</div>
-                <div class="u-role">{{ role() }}</div>
+                <div class="u-role">{{ role().join(', ') }}</div>
             </div>
         </div>
     </aside>
