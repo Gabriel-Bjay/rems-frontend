@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { DxButtonModule } from 'devextreme-angular';
 import { Auth } from '../core/services/auth';
 import { Role } from '../core/models/user';
@@ -20,6 +20,7 @@ interface NavItem {
 })
 export class Layout {
     private auth = inject(Auth);
+    private router = inject(Router);
 
     user = this.auth.currentUser;
     role = this.auth.roles;
@@ -48,6 +49,10 @@ export class Layout {
         const letters = parts.length >= 2 ? parts[0][0] + parts[1][0] : name.slice(0, 2);
         return (letters || '?').toUpperCase();
     });
+
+    goToDash(){
+      this.router.navigate(['/dashboard'])
+    }
 
     onLogout() {
         this.auth.logout();
