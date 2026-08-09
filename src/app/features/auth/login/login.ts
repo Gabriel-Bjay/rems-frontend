@@ -21,7 +21,7 @@ export class Login {
 
     async onLogin() {
         this.errorMessage.set(null);
-        this.loading.set(false);
+        this.loading.set(true);
 
         try {
             await this.auth.login(this.email, this.password);

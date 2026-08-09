@@ -9,7 +9,7 @@
         <dx-text-box [(value)]="password" placeholder="Your password" mode="password"></dx-text-box>
 
         @if (errorMessage()) {
-            <p class="error"> errorMessage() </p>
+            <p class="error" role="alert">{{ errorMessage() }}</p>
         }
 
         <dx-button
