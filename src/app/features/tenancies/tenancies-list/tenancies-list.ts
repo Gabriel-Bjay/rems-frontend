@@ -27,15 +27,15 @@ export class TenanciesList {
     agentsData: CustomStore = this.agentsApi.getStore();
 
     billingCycles = [
-        'Monthly',
-        'Quarterly',
-        'Annually',
+        'monthly',
+        'quarterly',
+        'annually',
     ];
 
     statuses = [
-        'Draft',
-        'Active',
-        'Ended',
+        'draft',
+        'active',
+        'ended',
     ];
 
     tenantDisplay = (tenant: any) =>

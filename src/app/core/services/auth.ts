@@ -35,12 +35,16 @@ export class Auth {
 
     async logout(): Promise<void> {
         try {
-            await firstValueFrom(this.http.post(`${environment.apiUrl}/logout`, {}));
+            await firstValueFrom(
+                this.http.post(`${environment.apiUrl}/logout`, {})
+            );
         } catch {
+            // Local logout must still succeed if the token has expired.
+        } finally {
             this.clearSession();
-            this.router.navigateByUrl('/login');
-        }
+            await this.router.navigateByUrl('/login');
     }
+}
 
     // Re-confirm the user from the API, useful on a hard refresh.
     async refreshUser(): Promise<void> {
