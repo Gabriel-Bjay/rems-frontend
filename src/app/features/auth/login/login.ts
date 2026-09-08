@@ -26,7 +26,7 @@ export class Login {
         try {
             await this.auth.login(this.email, this.password);
             this.loading.set(false);
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/app/dashboard']);
         } catch {
             this.loading.set(false);
             this.errorMessage.set('Invalid email or password.');

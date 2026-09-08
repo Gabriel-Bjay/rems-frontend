@@ -1,0 +1,91 @@
+:host { display: block; }
+
+.page { min-height: 100vh; background: var(--bg); }
+
+.topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px clamp(20px, 5vw, 64px);
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--orange); color: #fff; font-weight: 800; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(192, 90, 30, .35);
+}
+.brand .b-name { font-size: 19px; font-weight: 700; color: var(--text); }
+.brand .b-sub { font-size: 11px; color: var(--muted); }
+
+.cta {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: .65rem 1.15rem; border-radius: 9px;
+    font-size: .875rem; font-weight: 600; text-decoration: none;
+    border: 1px solid transparent;
+}
+.cta-ghost { color: var(--navy); border-color: var(--border); }
+.cta-ghost:hover { background: #fff; }
+.cta-fill { background: var(--orange); color: #fff; }
+.cta-fill:hover { background: var(--orange-hover); }
+.cta-outline { color: var(--navy); border-color: var(--navy); }
+.cta-outline:hover { background: var(--navy); color: #fff; }
+
+.hero {
+    max-width: 46rem;
+    padding: clamp(2.5rem, 8vw, 6rem) clamp(20px, 5vw, 64px) clamp(3rem, 8vw, 5rem);
+}
+.hero h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 1.3rem + 3vw, 3rem);
+    line-height: 1.1;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -.02em;
+}
+.hero .lede { margin: 0 0 1.75rem; font-size: 1.0625rem; line-height: 1.55; color: var(--muted); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem; }
+.hero-actions .cta { padding: .8rem 1.4rem; font-size: .9375rem; }
+.hero .note { font-size: .8125rem; color: var(--muted); max-width: 40ch; }
+
+.lifecycle, .roles {
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(20px, 5vw, 64px);
+    border-top: 1px solid var(--border);
+}
+.lifecycle h2, .roles h2 {
+    margin: 0 0 1.75rem; font-size: 1.375rem; font-weight: 700; color: var(--navy);
+}
+
+.steps {
+    display: grid; gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.step {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.35rem; box-shadow: 0 2px 8px rgba(31, 42, 68, .05);
+}
+.step svg { width: 22px; height: 22px; color: var(--orange); margin-bottom: .6rem; }
+.step-label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); font-weight: 700; margin-bottom: .3rem;
+}
+.step-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: .4rem; }
+.step p { margin: 0; font-size: .875rem; color: var(--muted); line-height: 1.5; }
+
+.role-grid {
+    display: grid; gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+.role {
+    padding: 1.1rem 1.25rem; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--border);
+}
+.role-name { font-weight: 700; color: var(--navy); margin-bottom: .3rem; }
+.role p { margin: 0; font-size: .8125rem; color: var(--muted); line-height: 1.45; }
+
+.foot {
+    display: flex; flex-wrap: wrap; gap: .5rem 2rem; justify-content: space-between;
+    padding: 1.5rem clamp(20px, 5vw, 64px) 2rem;
+    font-size: .8125rem; color: var(--muted);
+}
+.foot a { color: var(--orange); text-decoration: none; }
+.foot a:hover { text-decoration: underline; }
