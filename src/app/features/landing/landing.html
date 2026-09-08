@@ -1,0 +1,66 @@
+<div class="page">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">R</div>
+      <div>
+        <div class="b-name">PRMS</div>
+        <div class="b-sub">Rental Management</div>
+      </div>
+    </div>
+    <a class="cta cta-ghost" routerLink="/login">Sign in</a>
+  </header>
+
+  <section class="hero">
+    <h1>Property &amp; rental management, without the spreadsheet.</h1>
+    <p class="lede">
+      PRMS runs the full tenancy lifecycle for a letting agency — properties, units,
+      tenancies, invoices, payments, maintenance — behind one system with role-gated
+      access for owners, agents and tenants.
+    </p>
+    <div class="hero-actions">
+      <a class="cta cta-fill" routerLink="/login">Sign in to PRMS</a>
+      <a class="cta cta-outline" href="mailto:Jayabjay2018@gmail.com">Request a walkthrough</a>
+    </div>
+    <p class="note">
+      This is a portfolio project, not a public product — sign-up is limited to
+      seeded accounts. Email me for a live walkthrough or demo access.
+    </p>
+  </section>
+
+  <section class="lifecycle">
+    <h2>How a tenancy moves through the system</h2>
+    <div class="steps">
+      @for (step of steps; track step.label) {
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path [attr.d]="step.icon" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <div class="step-label">{{ step.label }}</div>
+          <div class="step-title">{{ step.title }}</div>
+          <p>{{ step.body }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="roles">
+    <h2>Built around who's using it</h2>
+    <div class="role-grid">
+      @for (r of roles; track r.name) {
+        <div class="role">
+          <div class="role-name">{{ r.name }}</div>
+          <p>{{ r.desc }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>PRMS — Laravel · PostgreSQL · Angular</span>
+    <a href="https://gabriel-bjay.github.io/Resume-Portfolio/" target="_blank" rel="noopener">
+      More of my work
+    </a>
+  </footer>
+
+</div>
