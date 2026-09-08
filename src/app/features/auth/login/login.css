@@ -3,27 +3,54 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f4f5f7;
+    background: var(--bg);
 }
 
 .login-card {
-    width: 320px;
+    width: 340px;
     padding: 32px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(31, 42, 68, .05);
 }
 
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    margin-bottom: 28px;
+}
+.brand .logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--orange);
+    color: #fff;
+    font-weight: 800;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(192, 90, 30, .35);
+    flex-shrink: 0;
+}
+.brand .b-name { font-size: 17px; font-weight: 700; color: var(--text); }
+.brand .b-sub { font-size: 11px; color: var(--muted); }
+
 .login-card h2 {
-    margin: 0 0 24px;
-    text-align: center;
+    margin: 0 0 20px;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text);
 }
 
 .login-card label {
     display: block;
     margin: 12px 0 4px;
     font-size: 13px;
-    color: #555555;
+    color: var(--muted);
 }
 
 .error {
@@ -35,3 +62,13 @@
 .login-card dx-button {
     margin-top: 20px;
 }
+
+.back {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+}
+.back:hover { color: var(--navy); }
