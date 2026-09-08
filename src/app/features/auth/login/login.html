@@ -1,6 +1,14 @@
 <div class="login-container">
     <div class="login-card">
-        <h2>PRMS Sign In</h2>
+        <a class="brand" routerLink="/">
+            <div class="logo">R</div>
+            <div>
+                <div class="b-name">PRMS</div>
+                <div class="b-sub">Rental Management</div>
+            </div>
+        </a>
+
+        <h2>Sign in to your account</h2>
 
         <label>Email</label>
         <dx-text-box [(value)]="email" placeholder="you@example.com" mode="email"></dx-text-box>
@@ -19,5 +27,7 @@
             [disabled]="loading()"
             (onClick)="onLogin()">
         </dx-button>
+
+        <a class="back" routerLink="/">&larr; Back to PRMS</a>
     </div>
 </div>
