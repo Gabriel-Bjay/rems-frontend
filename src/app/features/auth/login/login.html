@@ -1,6 +1,6 @@
 <div class="login-container">
     <div class="login-card">
-        <a class="brand" routerLink="/">
+        <a class="brand" href="/">
             <div class="logo">R</div>
             <div>
                 <div class="b-name">PRMS</div>
@@ -28,6 +28,11 @@
             (onClick)="onLogin()">
         </dx-button>
 
-        <a class="back" routerLink="/">&larr; Back to PRMS</a>
+        <!-- Plain href, not routerLink: a full reload here (not a client-side
+             route change) so DevExtreme's injected license-notice element
+             (appended to <body>, outside Angular's view tree — see below)
+             doesn't survive onto the landing page, which never uses
+             DevExtreme and shouldn't show it. -->
+        <a class="back" href="/">&larr; Back to PRMS</a>
     </div>
 </div>

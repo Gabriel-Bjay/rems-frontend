@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { DxTextBoxModule, DxButtonModule } from 'devextreme-angular';
 import { Auth } from '../../../core/services/auth';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [DxTextBoxModule, DxButtonModule, RouterLink],
+    imports: [DxTextBoxModule, DxButtonModule],
     templateUrl: './login.html',
     styleUrl: './login.css',
 })
