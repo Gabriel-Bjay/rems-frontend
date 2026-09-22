@@ -1,59 +1,38 @@
-# RemsFrontend
+# REMS — Rental & Estate Management System (Frontend)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.1.
+Angular client for the [REMS API](https://github.com/Gabriel-Bjay/rems-backend), a rental and property management platform covering listings, tenancies, billing, and payments.
 
-## Development server
+**Live demo:** https://rems-frontend-mu.vercel.app
 
-To start a local development server, run:
+## Features
+
+- **Property & unit management** — browse and manage properties and their units
+- **Owners, agents & tenants** — dedicated management views for each party in the system
+- **Tenancy tracking** — tenancy lifecycle tied to units and tenants
+- **Authenticated access** — token-based login with route guards and an HTTP interceptor that attaches auth headers to every request
+- **Data grids** — DevExtreme-powered tables for browsing and editing records
+
+## Tech stack
+
+- **Framework:** Angular 22 (standalone components)
+- **UI components:** DevExtreme
+- **Backend:** [rems-backend](https://github.com/Gabriel-Bjay/rems-backend) (Laravel + PostgreSQL REST API)
+
+## Getting started
 
 ```bash
+git clone https://github.com/Gabriel-Bjay/rems-frontend.git
+cd rems-frontend
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The app expects the API at the URL configured in `src/environments/environment.development.ts` (defaults to `http://127.0.0.1:8000/api` — see [rems-backend](https://github.com/Gabriel-Bjay/rems-backend) for running the API locally).
 
-## Code scaffolding
+## Related
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- [rems-backend](https://github.com/Gabriel-Bjay/rems-backend) — Laravel API this app talks to
 
-```bash
-ng generate component component-name
-```
+## License
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT
