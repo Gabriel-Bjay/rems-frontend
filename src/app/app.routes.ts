@@ -1,4 +1,5 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
@@ -52,6 +53,27 @@ export const routes: Routes = [
                 path: 'tenancies',
                 loadComponent: () =>
                     import('./features/tenancies/tenancies-list/tenancies-list').then((m) => m.TenanciesList),
+            },
+            {
+                path: 'invoices',
+                loadComponent: () =>
+                    import('./features/invoices/invoices-list/invoices-list').then((m) => m.InvoicesList),
+            },
+            {
+                // Notification links point at one invoice; open it over the list.
+                path: 'invoices/:id',
+                redirectTo: ({ params }) =>
+                    inject(Router).createUrlTree(['/app/invoices'], { queryParams: { invoice: params['id'] } }),
+            },
+            {
+                path: 'payments',
+                loadComponent: () =>
+                    import('./features/payments/payments-list/payments-list').then((m) => m.PaymentsList),
+            },
+            {
+                path: 'maintenance',
+                loadComponent: () =>
+                    import('./features/maintenance/maintenance-board/maintenance-board').then((m) => m.MaintenanceBoard),
             },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         ],

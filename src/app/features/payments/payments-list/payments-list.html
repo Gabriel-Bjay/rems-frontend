@@ -1,0 +1,237 @@
+<div class="page">
+    <div class="page-head head-row">
+        <div>
+            <h1>Payments</h1>
+            <p>
+                @if (isTenant()) {
+                    Everything you have paid, and payments still waiting to be confirmed.
+                } @else {
+                    Money received from tenants. Confirm reported payments to apply them to invoices.
+                }
+            </p>
+        </div>
+        @if (canRecord()) {
+            <div class="head-actions">
+                <dx-button
+                    [text]="isTenant() ? 'Report a payment' : 'Record a payment'"
+                    icon="plus"
+                    type="default"
+                    (onClick)="openForm()">
+                </dx-button>
+            </div>
+        }
+    </div>
+
+    @let s = stats();
+    <div class="stats">
+        <div class="card stat">
+            <div class="stat-label">{{ isTenant() ? 'Paid this month' : 'Received this month' }}</div>
+            <div class="stat-value">{{ money(s.received) }}</div>
+            <div class="stat-sub">{{ s.receivedCount }} payment{{ s.receivedCount === 1 ? '' : 's' }}</div>
+        </div>
+        <div class="card stat">
+            <div class="stat-label">Waiting for confirmation</div>
+            <div class="stat-value" [class.warn]="s.waitingCount > 0 && isStaff()">{{ money(s.waiting) }}</div>
+            <div class="stat-sub">
+                @if (s.waitingCount) {
+                    {{ s.waitingCount }} reported, not yet applied
+                } @else {
+                    All caught up
+                }
+            </div>
+        </div>
+        <div class="card stat">
+            <div class="stat-label">{{ isTenant() ? 'Credit on your account' : 'Unapplied credit' }}</div>
+            <div class="stat-value">{{ money(s.credit) }}</div>
+            <div class="stat-sub">Used automatically against the next invoice</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        @for (f of filters; track f.value) {
+            <button type="button" class="tab" [class.active]="filter() === f.value" (click)="setFilter(f.value)">
+                {{ f.text }} <span class="count">{{ counts()[f.value] }}</span>
+            </button>
+        }
+    </div>
+
+    <div class="grid-card">
+        <dx-data-grid
+            [dataSource]="rows()"
+            keyExpr="id"
+            [showBorders]="false"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true"
+            [noDataText]="loading() ? 'Loading payments…' : 'No payments here.'"
+            (onRowClick)="open($event.data)">
+
+            <dxo-search-panel [visible]="true" [width]="260" placeholder="Search tenant, reference…"></dxo-search-panel>
+            <dxo-paging [pageSize]="12"></dxo-paging>
+            <dxo-pager [visible]="true" [showInfo]="true" infoText="Showing {2} payments"></dxo-pager>
+            <dxo-sorting mode="single"></dxo-sorting>
+
+            <dxo-toolbar>
+                <dxi-item location="before" template="titleTemplate"></dxi-item>
+                <dxi-item name="searchPanel" location="after"></dxi-item>
+            </dxo-toolbar>
+            <div *dxTemplate="let _ of 'titleTemplate'" class="grid-title">
+                {{ rows().length }} payment{{ rows().length === 1 ? '' : 's' }}
+            </div>
+
+            <dxi-column caption="Date" [calculateCellValue]="paidAtOf" dataType="date" sortOrder="desc" cellTemplate="dateCell"></dxi-column>
+            <div *dxTemplate="let cell of 'dateCell'">
+                <div class="cell-main">{{ shortDate(cell.data.paid_at) }}</div>
+                <div class="cell-sub">{{ timeOf(cell.data.paid_at) }}</div>
+            </div>
+
+            <dxi-column caption="Tenant" [calculateCellValue]="tenantOf" cellTemplate="tenantCell" [visible]="!isTenant()"></dxi-column>
+            <div *dxTemplate="let cell of 'tenantCell'" class="person-cell">
+                <div class="pa">{{ initials(cell.value) }}</div>
+                <div>
+                    <div class="pn">{{ cell.value }}</div>
+                    <div class="cell-sub">{{ cell.data.unit_name ?? 'No unit' }}</div>
+                </div>
+            </div>
+
+            <dxi-column caption="Method" [calculateCellValue]="methodOf" cellTemplate="methodCell"></dxi-column>
+            <div *dxTemplate="let cell of 'methodCell'" class="method-cell">
+                <span class="method {{ cell.data.method }}">{{ methodLabel(cell.data.method) }}</span>
+                <span class="cell-sub mono">{{ cell.data.gateway_reference ?? '—' }}</span>
+            </div>
+
+            <dxi-column dataField="amount" caption="Amount" dataType="number" alignment="right" cellTemplate="amountCell"></dxi-column>
+            <div *dxTemplate="let cell of 'amountCell'">
+                <div class="amount">{{ money(cell.value) }}</div>
+                @if (unapplied(cell.data) > 0) {
+                    <div class="cell-sub">{{ money(unapplied(cell.data)) }} credit</div>
+                }
+            </div>
+
+            <dxi-column caption="Status" [calculateCellValue]="statusOf" cellTemplate="statusCell" alignment="center"></dxi-column>
+            <div *dxTemplate="let cell of 'statusCell'">
+                <span class="chip {{ cell.data.status }}">{{ cell.value }}</span>
+            </div>
+
+            <dxi-column caption="" [visible]="isStaff()" [allowSorting]="false" [allowSearch]="false" cellTemplate="actionCell" alignment="right" [width]="110"></dxi-column>
+            <div *dxTemplate="let cell of 'actionCell'">
+                @if (cell.data.status === 'unmatched') {
+                    <button type="button" class="grid-action" [disabled]="confirming() === cell.data.id" (click)="confirm(cell.data, $event)">
+                        {{ confirming() === cell.data.id ? 'Applying…' : 'Confirm' }}
+                    </button>
+                }
+            </div>
+        </dx-data-grid>
+    </div>
+</div>
+
+<dx-popup
+    [visible]="!!selected()"
+    (onHidden)="selected.set(null)"
+    title="Payment"
+    [width]="500"
+    height="auto"
+    maxHeight="90vh"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    @if (selected(); as p) {
+        <div class="detail-head">
+            <div>
+                <div class="detail-title">{{ money(p.amount) }}</div>
+                <div class="muted small">{{ personName(p.tenant_fname, p.tenant_lname) }} · {{ p.unit_name ?? 'No unit' }}</div>
+            </div>
+            <span class="chip {{ p.status }}">{{ statusText(p.status) }}</span>
+        </div>
+
+        <dl class="facts">
+            <div><dt>Paid</dt><dd>{{ shortDate(p.paid_at) }} {{ timeOf(p.paid_at) }}</dd></div>
+            <div><dt>Method</dt><dd>{{ methodLabel(p.method) }}</dd></div>
+            <div><dt>Reference</dt><dd class="mono">{{ p.gateway_reference ?? '—' }}</dd></div>
+        </dl>
+
+        <div class="section-label">Applied to</div>
+        @if (detailLoading()) {
+            <div class="empty-note">Loading…</div>
+        } @else {
+            <table class="lines">
+                @for (a of p.allocations ?? []; track a.id) {
+                    <tr>
+                        <td>
+                            {{ invoiceNo(a.invoice_id) }}
+                            <span class="muted small">· {{ period(a.period_start) }} rent</span>
+                        </td>
+                        <td>{{ money(a.amount_applied) }}</td>
+                    </tr>
+                } @empty {
+                    <tr>
+                        <td class="muted" colspan="2">
+                            @if (p.status === 'unmatched') {
+                                Not applied yet. It is applied to the oldest unpaid invoices once confirmed.
+                            } @else {
+                                Nothing was owed when this payment arrived, so it is held as credit.
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+            @if (unapplied(p) > 0) {
+                <div class="note">{{ money(unapplied(p)) }} is held as credit for the next invoice.</div>
+            }
+        }
+
+        @if (isStaff() && p.status === 'unmatched') {
+            <div class="form-actions">
+                <dx-button
+                    text="Confirm and apply"
+                    type="default"
+                    [disabled]="confirming() === p.id"
+                    (onClick)="confirm(p)">
+                </dx-button>
+            </div>
+        }
+    }
+</dx-popup>
+
+<dx-popup
+    [visible]="formOpen()"
+    (visibleChange)="formOpen.set($event)"
+    [title]="isTenant() ? 'Report a payment' : 'Record a payment'"
+    [width]="440"
+    height="auto"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    <div class="form">
+        @if (isStaff()) {
+            <label>Who paid</label>
+            <dx-select-box
+                [items]="tenancies()"
+                valueExpr="id"
+                [displayExpr]="tenancyText"
+                [searchEnabled]="true"
+                searchMode="contains"
+                [searchExpr]="['tenant_fname', 'tenant_lname', 'unit_name', 'property_name']"
+                placeholder="Search tenant or unit"
+                [(value)]="form.tenancyId">
+            </dx-select-box>
+        }
+        <label>Amount (KES)</label>
+        <!-- Split binding: the box starts empty, which dx-number-box's number-only type doesn't allow two-way. -->
+        <dx-number-box [value]="$any(form.amount)" (valueChange)="form.amount = $event" [min]="1" format="#,##0" placeholder="e.g. 38,000"></dx-number-box>
+        <label>Method</label>
+        <dx-select-box [items]="methods" valueExpr="value" displayExpr="text" [(value)]="form.method"></dx-select-box>
+        <label>Reference {{ form.method === 'mpesa' ? '(M-Pesa code)' : '(optional)' }}</label>
+        <dx-text-box [(value)]="form.reference" placeholder="e.g. QK7X2ZP4TA"></dx-text-box>
+        <label>Date paid</label>
+        <dx-date-box [(value)]="form.paidAt" type="date" [max]="today"></dx-date-box>
+        @if (isStaff()) {
+            <div class="check">
+                <dx-check-box [(value)]="form.confirmNow" text="Money has cleared: confirm and apply it to invoices now"></dx-check-box>
+            </div>
+        } @else {
+            <p class="form-hint">Your landlord's team will confirm it against their statement, usually within a day.</p>
+        }
+        <div class="form-actions">
+            <dx-button text="Cancel" stylingMode="text" (onClick)="formOpen.set(false)"></dx-button>
+            <dx-button [text]="isTenant() ? 'Send' : 'Save payment'" type="default" [disabled]="saving()" (onClick)="save()"></dx-button>
+        </div>
+    </div>
+</dx-popup>

@@ -1,63 +1,353 @@
 <div class="page">
-    <div class="page-head">
-        <h1>Dashboard</h1>
-        <p>An overview of registered properties, units, and tenancies.</p>
+    <div class="page-head head-row">
+        <div>
+            <h1>{{ greeting() }}</h1>
+            <p>
+                @if (isTenantView()) {
+                    Your home, rent and requests in one place.
+                } @else {
+                    Here is how the portfolio is doing today.
+                }
+            </p>
+        </div>
+        @if (isStaff() && data() && !isTenantView()) {
+            <div class="head-actions">
+                <dx-button
+                    text="Generate invoices"
+                    icon="doc"
+                    stylingMode="outlined"
+                    [disabled]="generating()"
+                    (onClick)="generateInvoices()">
+                </dx-button>
+                <a class="btn-primary" routerLink="/app/payments" [queryParams]="{ record: 1 }">Record a payment</a>
+            </div>
+        }
     </div>
 
-    @if (loading()) {
-        <div class="dash-loading">Loading your data...</div>
-    } @else {
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-label">Properties</div>
-                <div class="stat-value">{{ propertyCount() }}</div>
-                <a class="stat-link" routerLink="/properties">View all</a>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-label">Units</div>
-                <div class="stat-value">{{ unitCount() }}</div>
-                <div class="stat-breakdown">
-                    <span class="pill vacant">{{ vacantCount() }} vacant</span>
-                    <span class="pill occupied">{{ occupiedCount() }} occupied</span>
-                    <span class="pill maint">{{ maintenanceCount() }} maintenance</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-label">Tenants</div>
-                <div class="stat-value">{{ tenantCount() }}</div>
-                <a class="stat-link" routerLink="/tenants">View all</a>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-label">Active tenancies</div>
-                <!-- <div class="stat-value">{{ activeTenancyCount() }}</div> -->
-                <a class="stat-link" routerLink="/tenancies">View all</a>
-            </div>
-        </div>
-
-        <!-- <div class="grid-card recent">
-            <div class="grid-title">Recent tenancies</div>
-            @if (recentTenancies().length === 0) {
-                <div class="empty">No tenancies yet.</div>
-            } @else {
-                <table class="recent-table">
-                    <thead>
-                        <tr><th>Unit</th><th>Tenant</th><th>Start date</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                        @for (t of recentTenancies(); track t.id) {
-                            <tr>
-                                <td>{{ t.unit }}</td>
-                                <td>{{ t.tenant }}</td>
-                                <td>{{ t.start_date }}</td>
-                                <td><span class="status-chip {{ t.status }}">{{ t.status }}</span></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    @if (loading() && !data()) {
+        <div class="kpi-grid">
+            @for (i of [1, 2, 3, 4]; track i) {
+                <div class="card kpi skeleton"></div>
             }
-        </div> -->
+        </div>
+    } @else if (failed()) {
+        <div class="card empty-state">
+            <p>We couldn't load the dashboard.</p>
+            <dx-button text="Try again" stylingMode="outlined" (onClick)="load()"></dx-button>
+        </div>
+    } @else {
+        @if (data(); as d) {
+            @if (d.view === 'tenant' && d.tenant) {
+                <!-- ================= Tenant: my home ================= -->
+                @let t = d.tenant;
+                <div class="card balance-hero" [class.clear]="t.balance <= 0">
+                    <div>
+                        @if (t.balance > 0) {
+                            <div class="eyebrow">Balance due</div>
+                            <div class="hero-amount">{{ money(t.balance) }}</div>
+                            @if (t.next_due; as next) {
+                                <div class="hero-sub">
+                                    {{ period(next.period_start) }} rent, due {{ shortDate(next.due_date) }}
+                                    <span class="chip {{ next.status }}">{{ label(next.status) }}</span>
+                                </div>
+                            }
+                        } @else {
+                            <div class="eyebrow">Balance</div>
+                            <div class="hero-amount">You're all paid up</div>
+                            <div class="hero-sub">Thank you. Your next invoice will appear here.</div>
+                        }
+                    </div>
+                    <div class="hero-actions">
+                        <dx-button
+                            text="Report a payment"
+                            type="default"
+                            stylingMode="contained"
+                            (onClick)="openPayment()">
+                        </dx-button>
+                        <span class="hint">Paid by M-Pesa, bank or cash? Report it and we'll confirm it.</span>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    @if (t.tenancy; as home) {
+                        <div class="card panel">
+                            <div class="panel-title">Your home</div>
+                            <div class="home-name">{{ home.property_name }} · {{ home.unit_name }}</div>
+                            <div class="muted">{{ home.address }}</div>
+                            <dl class="facts">
+                                <div><dt>Rent</dt><dd>{{ money(home.base_rent) }} / {{ home.billing_cycle === 'monthly' ? 'month' : home.billing_cycle }}</dd></div>
+                                <div><dt>Lease start</dt><dd>{{ shortDate(home.start_date) }}</dd></div>
+                                <div><dt>Lease end</dt><dd>{{ home.end_date ? shortDate(home.end_date) : 'Rolling' }}</dd></div>
+                            </dl>
+                        </div>
+                    }
+                    <div class="card panel">
+                        <div class="panel-title">Deposit</div>
+                        @if (t.deposit; as dep) {
+                            <div class="big">{{ money(dep.amount_held) }}</div>
+                            <div class="muted">held of {{ money(dep.amount_required) }} required</div>
+                            <span class="chip {{ dep.status }}">{{ label(dep.status) }}</span>
+                        } @else {
+                            <div class="muted">No deposit on record.</div>
+                        }
+                    </div>
+                    <div class="card panel">
+                        <div class="panel-title row">
+                            <span>Maintenance</span>
+                            <button class="link" type="button" (click)="openRequest()">Raise a request</button>
+                        </div>
+                        @if (d.maintenance.recent.length === 0) {
+                            <div class="muted">Nothing open. Report a problem any time.</div>
+                        } @else {
+                            <ul class="list">
+                                @for (ticket of d.maintenance.recent; track ticket.id) {
+                                    <li>
+                                        <div class="grow">
+                                            <div class="strong">{{ ticket.title }}</div>
+                                            <div class="muted small">Raised {{ dayMonth(ticket.created_at) }}</div>
+                                        </div>
+                                        <span class="chip {{ ticket.status }}">{{ label(ticket.status) }}</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+                <div class="card panel">
+                    <div class="panel-title row">
+                        <span>Recent payments</span>
+                        <a class="link" routerLink="/app/payments">All payments</a>
+                    </div>
+                    @if (d.recent_payments.length === 0) {
+                        <div class="muted">No payments yet.</div>
+                    } @else {
+                        <ul class="list">
+                            @for (p of d.recent_payments; track p.id) {
+                                <li>
+                                    <span class="method {{ p.method }}">{{ methodLabel(p.method) }}</span>
+                                    <div class="grow">
+                                        <div class="strong">{{ money(p.amount) }}</div>
+                                        <div class="muted small">{{ shortDate(p.paid_at) }}{{ p.gateway_reference ? ' · ' + p.gateway_reference : '' }}</div>
+                                    </div>
+                                    <span class="chip {{ p.status }}">{{ p.status === 'unmatched' ? 'Awaiting confirmation' : 'Received' }}</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            } @else {
+                <!-- ================= Staff and owners: portfolio ================= -->
+                <div class="kpi-grid">
+                    <div class="card kpi">
+                        <div class="kpi-label">Occupancy</div>
+                        <div class="kpi-value">{{ percent(d.portfolio.occupancy_rate) }}</div>
+                        <div class="bar"><span [style.width.%]="(d.portfolio.occupancy_rate ?? 0) * 100"></span></div>
+                        <div class="kpi-sub">{{ d.portfolio.occupied }} of {{ d.portfolio.units }} units occupied</div>
+                        <div class="pills">
+                            <span class="pill vacant">{{ d.portfolio.vacant }} vacant</span>
+                            @if (d.portfolio.under_maintenance) {
+                                <span class="pill maint">{{ d.portfolio.under_maintenance }} under maintenance</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card kpi">
+                        <div class="kpi-label">Collected this month</div>
+                        <div class="kpi-value">{{ money(d.finance.collected_this_month) }}</div>
+                        <div class="bar good"><span [style.width.%]="Math.min(100, (d.finance.collection_rate ?? 0) * 100)"></span></div>
+                        <div class="kpi-sub">
+                            {{ percent(d.finance.collection_rate) }} of {{ money(d.finance.billed_this_month) }} billed
+                        </div>
+                    </div>
+
+                    <a class="card kpi clickable" routerLink="/app/invoices" [queryParams]="{ status: 'overdue' }">
+                        <div class="kpi-label">Outstanding rent</div>
+                        <div class="kpi-value" [class.warn]="d.finance.outstanding > 0">{{ money(d.finance.outstanding) }}</div>
+                        <div class="kpi-sub">
+                            {{ d.finance.overdue_count }} overdue invoice{{ d.finance.overdue_count === 1 ? '' : 's' }}
+                            · {{ money(d.finance.overdue_amount) }}
+                        </div>
+                        <span class="kpi-link">View overdue →</span>
+                    </a>
+
+                    <a class="card kpi clickable" routerLink="/app/payments" [queryParams]="{ status: 'unmatched' }">
+                        <div class="kpi-label">Awaiting confirmation</div>
+                        <div class="kpi-value">{{ d.finance.pending_confirmations }}</div>
+                        <div class="kpi-sub">
+                            payment{{ d.finance.pending_confirmations === 1 ? '' : 's' }} reported, not yet applied
+                        </div>
+                        <span class="kpi-link">Review →</span>
+                    </a>
+
+                    <a class="card kpi clickable" routerLink="/app/maintenance">
+                        <div class="kpi-label">Maintenance</div>
+                        <div class="kpi-value">{{ d.maintenance.open + d.maintenance.in_progress }}</div>
+                        <div class="kpi-sub">{{ d.maintenance.open }} open · {{ d.maintenance.in_progress }} in progress</div>
+                        <span class="kpi-link">Open board →</span>
+                    </a>
+                </div>
+
+                <div class="grid-2-1">
+                    <div class="card panel">
+                        <div class="panel-title row">
+                            <span>Rent billed vs collected</span>
+                            <span class="muted small">Last 6 months · rent roll {{ money(d.portfolio.rent_roll) }}/month</span>
+                        </div>
+                        <dx-chart [dataSource]="d.trend">
+                            <dxo-chart-size [height]="280"></dxo-chart-size>
+                            <dxo-chart-common-series-settings argumentField="label" type="bar" [barPadding]="0.3"></dxo-chart-common-series-settings>
+                            <dxi-chart-series valueField="billed" name="Billed" color="#cfd6e4"></dxi-chart-series>
+                            <dxi-chart-series valueField="collected" name="Collected" color="#c05a1e"></dxi-chart-series>
+                            <dxo-chart-legend verticalAlignment="top" horizontalAlignment="right"></dxo-chart-legend>
+                            <dxi-chart-value-axis>
+                                <dxo-chart-axis-label [customizeText]="axisMoney"></dxo-chart-axis-label>
+                            </dxi-chart-value-axis>
+                            <dxo-chart-tooltip [enabled]="true" [customizeTooltip]="chartTooltip"></dxo-chart-tooltip>
+                        </dx-chart>
+                    </div>
+
+                    <div class="card panel">
+                        <div class="panel-title row">
+                            <span>Largest arrears</span>
+                            <a class="link" routerLink="/app/invoices" [queryParams]="{ status: 'overdue' }">All overdue</a>
+                        </div>
+                        @if (d.arrears.length === 0) {
+                            <div class="muted">No one is behind on rent.</div>
+                        } @else {
+                            <ul class="list">
+                                @for (row of d.arrears; track row.tenancy_id) {
+                                    <li>
+                                        <span class="avatar">{{ initials(personName(row.tenant_fname, row.tenant_lname)) }}</span>
+                                        <div class="grow">
+                                            <div class="strong">{{ personName(row.tenant_fname, row.tenant_lname) }}</div>
+                                            <div class="muted small">{{ row.unit_name }} · behind since {{ dayMonth(row.oldest_due) }}</div>
+                                        </div>
+                                        <span class="amount warn">{{ money(row.balance) }}</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="card panel">
+                        <div class="panel-title">Leases ending soon</div>
+                        @if (d.expiring_leases.length === 0) {
+                            <div class="muted">No leases end in the next 60 days.</div>
+                        } @else {
+                            <ul class="list">
+                                @for (lease of d.expiring_leases; track lease.id) {
+                                    <li>
+                                        <div class="grow">
+                                            <div class="strong">{{ personName(lease.tenant_fname, lease.tenant_lname) }}</div>
+                                            <div class="muted small">{{ lease.property_name }} · {{ lease.unit_name }}</div>
+                                        </div>
+                                        <span class="chip" [class.overdue]="lease.days_left <= 30">
+                                            {{ lease.days_left === 0 ? 'Today' : 'in ' + lease.days_left + ' days' }}
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                    <div class="card panel">
+                        <div class="panel-title row">
+                            <span>Recent payments</span>
+                            <a class="link" routerLink="/app/payments">All payments</a>
+                        </div>
+                        @if (d.recent_payments.length === 0) {
+                            <div class="muted">No payments yet.</div>
+                        } @else {
+                            <ul class="list">
+                                @for (p of d.recent_payments; track p.id) {
+                                    <li>
+                                        <span class="method {{ p.method }}">{{ methodLabel(p.method) }}</span>
+                                        <div class="grow">
+                                            <div class="strong">{{ personName(p.tenant_fname, p.tenant_lname) }}</div>
+                                            <div class="muted small">{{ p.unit_name ?? '—' }} · {{ dayMonth(p.paid_at) }}</div>
+                                        </div>
+                                        <div class="right">
+                                            <div class="amount">{{ money(p.amount) }}</div>
+                                            @if (p.status === 'unmatched') {
+                                                <span class="chip unmatched">To confirm</span>
+                                            }
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                    <div class="card panel">
+                        <div class="panel-title row">
+                            <span>Maintenance</span>
+                            <a class="link" routerLink="/app/maintenance">Board</a>
+                        </div>
+                        @if (d.maintenance.recent.length === 0) {
+                            <div class="muted">No open requests.</div>
+                        } @else {
+                            <ul class="list">
+                                @for (ticket of d.maintenance.recent; track ticket.id) {
+                                    <li>
+                                        <div class="grow">
+                                            <div class="strong">{{ ticket.title }}</div>
+                                            <div class="muted small">{{ ticket.unit_name }} · {{ daysSince(ticket.created_at) }}d ago</div>
+                                        </div>
+                                        <span class="chip {{ ticket.status }}">{{ label(ticket.status) }}</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            }
+        }
     }
 </div>
+
+<dx-popup
+    [visible]="payOpen()"
+    (visibleChange)="payOpen.set($event)"
+    title="Report a payment"
+    [width]="420"
+    height="auto"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    <div class="form">
+        <label>Amount (KES)</label>
+        <dx-number-box [(value)]="payment.amount" [min]="1" format="#,##0"></dx-number-box>
+        <label>Method</label>
+        <dx-select-box [items]="methods" valueExpr="value" displayExpr="text" [(value)]="payment.method"></dx-select-box>
+        <label>Reference {{ payment.method === 'mpesa' ? '(M-Pesa code)' : '(optional)' }}</label>
+        <dx-text-box [(value)]="payment.reference" placeholder="e.g. QK7X2ZP4TA"></dx-text-box>
+        <label>Date paid</label>
+        <dx-date-box [(value)]="payment.paidAt" type="date" [max]="today"></dx-date-box>
+        <div class="form-actions">
+            <dx-button text="Cancel" stylingMode="text" (onClick)="payOpen.set(false)"></dx-button>
+            <dx-button text="Send" type="default" [disabled]="saving()" (onClick)="reportPayment()"></dx-button>
+        </div>
+    </div>
+</dx-popup>
+
+<dx-popup
+    [visible]="requestOpen()"
+    (visibleChange)="requestOpen.set($event)"
+    title="Raise a maintenance request"
+    [width]="440"
+    height="auto"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    <div class="form">
+        <label>What needs fixing?</label>
+        <dx-text-box [(value)]="request.title" placeholder="e.g. Leaking kitchen tap" [maxLength]="150"></dx-text-box>
+        <label>Details (optional)</label>
+        <dx-text-area [(value)]="request.description" [height]="100"></dx-text-area>
+        <div class="form-actions">
+            <dx-button text="Cancel" stylingMode="text" (onClick)="requestOpen.set(false)"></dx-button>
+            <dx-button text="Send request" type="default" [disabled]="saving()" (onClick)="raiseRequest()"></dx-button>
+        </div>
+    </div>
+</dx-popup>
