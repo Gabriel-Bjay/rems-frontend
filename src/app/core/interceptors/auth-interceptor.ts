@@ -1,22 +1,30 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 import { Auth } from '../services/auth';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const auth = inject(Auth);
-    // Support different Auth implementations: token as function, token property, or getToken
-    const anyAuth = auth as any;
-    const token = typeof anyAuth.token === 'function'
-        ? anyAuth.token()
-        : anyAuth.token ?? (typeof anyAuth.getToken === 'function' ? anyAuth.getToken() : anyAuth.getToken ?? null);
+    const router = inject(Router);
+    const token = auth.getToken();
 
-    if (token) {
-        req = req.clone({
-            setHeaders: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-    }
+    req = req.clone({
+        setHeaders: {
+            Accept: 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
 
-    return next(req);
+    return next(req).pipe(
+        catchError((error: HttpErrorResponse) => {
+            // A revoked or expired token: end the stale session rather than
+            // leave every page failing. The login call reports its own 401.
+            if (error.status === 401 && token && !req.url.endsWith('/login')) {
+                auth.clearSession();
+                router.navigateByUrl('/login');
+            }
+            return throwError(() => error);
+        }),
+    );
 };

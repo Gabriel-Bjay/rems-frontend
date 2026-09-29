@@ -1,1 +1,8 @@
 :host { display: block; }
+
+/* Lease actions in the command column: text links, orange to start, red to end. */
+:host ::ng-deep .dx-command-edit a.lease-action {
+    font-weight: 600; font-size: 13px; text-decoration: none; color: var(--orange); margin-right: 8px;
+}
+:host ::ng-deep .dx-command-edit a.lease-action.end { color: #b42318; }
+:host ::ng-deep .dx-command-edit a.lease-action:hover { text-decoration: underline; }

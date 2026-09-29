@@ -50,7 +50,7 @@ export class Auth {
     async refreshUser(): Promise<void> {
         if (!this.getToken()) return;
         try {
-            const user = await firstValueFrom(this.http.get<User>(`${environment.apiUrl}/me`));
+            const { user } = await firstValueFrom(this.http.get<{ user: User }>(`${environment.apiUrl}/me`));
             localStorage.setItem(this.userKey, JSON.stringify(user));
             this.currentUser.set(user);
         } catch {

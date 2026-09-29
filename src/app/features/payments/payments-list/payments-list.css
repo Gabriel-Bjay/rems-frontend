@@ -1,0 +1,4 @@
+:host { display: block; }
+
+.method-cell { display: flex; align-items: center; gap: 10px; }
+.mono { font-family: Consolas, 'SFMono-Regular', Menlo, monospace; letter-spacing: .02em; }

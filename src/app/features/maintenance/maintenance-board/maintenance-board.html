@@ -1,0 +1,188 @@
+<div class="page">
+    <div class="page-head head-row">
+        <div>
+            <h1>Maintenance</h1>
+            <p>
+                @if (isTenant()) {
+                    Report problems in your home and follow them until they are fixed.
+                } @else {
+                    Repair requests across the portfolio, from report to fix.
+                }
+            </p>
+        </div>
+        <div class="head-actions">
+            <dx-button text="Raise a request" icon="plus" type="default" (onClick)="openRaise()"></dx-button>
+        </div>
+    </div>
+
+    @let s = stats();
+    <div class="stats">
+        <div class="card stat">
+            <div class="stat-label">Unresolved requests</div>
+            <div class="stat-value">{{ s.waiting }}</div>
+            <div class="stat-sub">
+                @if (s.waiting) {
+                    Oldest waiting {{ s.oldest }} day{{ s.oldest === 1 ? '' : 's' }}
+                } @else {
+                    Nothing waiting
+                }
+            </div>
+        </div>
+        <div class="card stat">
+            <div class="stat-label">Average time to fix</div>
+            <div class="stat-value">{{ s.avgDays === null ? '—' : s.avgDays + ' days' }}</div>
+            <div class="stat-sub">From report to resolved</div>
+        </div>
+        @if (!isTenant()) {
+            <div class="card stat">
+                <div class="stat-label">Repair costs this month</div>
+                <div class="stat-value">{{ money(s.costThisMonth) }}</div>
+                <div class="stat-sub">Recorded when a ticket is resolved</div>
+            </div>
+        }
+    </div>
+
+    <div class="board">
+        @for (lane of lanes(); track lane.key) {
+            <section class="lane {{ lane.key }}">
+                <header class="lane-head">
+                    <div>
+                        <div class="lane-title">{{ lane.title }} <span class="lane-count">{{ lane.items.length }}</span></div>
+                        <div class="lane-hint">{{ lane.hint }}</div>
+                    </div>
+                </header>
+
+                @for (t of lane.items; track t.id) {
+                    <article class="card ticket">
+                        <div class="t-top">
+                            <div class="t-title">{{ t.title }}</div>
+                            @if (lane.key !== 'done' && daysSince(t.created_at) >= 14) {
+                                <span class="chip overdue">{{ daysSince(t.created_at) }}d</span>
+                            }
+                        </div>
+                        <div class="t-where">{{ t.unit_name }} · {{ t.property_name }}</div>
+                        @if (t.description) {
+                            <p class="t-desc">{{ t.description }}</p>
+                        }
+                        <div class="t-meta">
+                            @if (!isTenant() && t.tenant_fname) {
+                                <span>Reported by {{ personName(t.tenant_fname, t.tenant_lname) }}</span>
+                            }
+                            <span>{{ timeAgo(t.created_at) }}</span>
+                        </div>
+
+                        @if (t.agent_fname && lane.key !== 'open') {
+                            <div class="t-agent">
+                                <span class="dot"></span>
+                                {{ lane.key === 'done' ? 'Fixed by' : 'With' }} {{ personName(t.agent_fname, t.agent_lname) }}
+                            </div>
+                        }
+                        @if (lane.key === 'done') {
+                            <div class="t-done">
+                                <span>Resolved {{ shortDate(t.resolved_at) }}</span>
+                                @if (t.repair_cost !== null && !isTenant()) {
+                                    <span class="amount">{{ money(t.repair_cost) }}</span>
+                                }
+                            </div>
+                        }
+
+                        @if (isStaff() && lane.key === 'open') {
+                            <button type="button" class="grid-action t-action" [disabled]="busy() === t.id" (click)="startAssign(t)">
+                                {{ isAdmin() ? 'Assign' : "I'll handle it" }}
+                            </button>
+                        }
+                        @if (isStaff() && lane.key === 'in_progress') {
+                            <button type="button" class="t-action outline" [disabled]="busy() === t.id" (click)="startResolve(t)">
+                                Mark resolved
+                            </button>
+                        }
+                    </article>
+                } @empty {
+                    <div class="lane-empty">{{ loading() ? 'Loading…' : 'Nothing here' }}</div>
+                }
+            </section>
+        }
+    </div>
+</div>
+
+<dx-popup
+    [visible]="!!assignFor()"
+    (onHidden)="assignFor.set(null)"
+    title="Assign request"
+    [width]="400"
+    height="auto"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    @if (assignFor(); as t) {
+        <div class="form">
+            <div class="strong">{{ t.title }}</div>
+            <div class="muted small">{{ t.unit_name }} · {{ t.property_name }}</div>
+            <label>Agent</label>
+            <dx-select-box [items]="agents()" valueExpr="id" [displayExpr]="agentText" [(value)]="assignAgentId" placeholder="Choose an agent"></dx-select-box>
+            <div class="form-actions">
+                <dx-button text="Cancel" stylingMode="text" (onClick)="assignFor.set(null)"></dx-button>
+                <dx-button text="Assign" type="default" [disabled]="busy() === t.id" (onClick)="assign(t, assignAgentId)"></dx-button>
+            </div>
+        </div>
+    }
+</dx-popup>
+
+<dx-popup
+    [visible]="!!resolveFor()"
+    (onHidden)="resolveFor.set(null)"
+    title="Mark as resolved"
+    [width]="400"
+    height="auto"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    @if (resolveFor(); as t) {
+        <div class="form">
+            <div class="strong">{{ t.title }}</div>
+            <div class="muted small">{{ t.unit_name }} · {{ t.property_name }}</div>
+            <label>Repair cost (KES, optional)</label>
+            <!-- Split binding: the box starts empty, which dx-number-box's number-only type doesn't allow two-way. -->
+            <dx-number-box [value]="$any(repairCost)" (valueChange)="repairCost = $event" [min]="0" format="#,##0" placeholder="e.g. 2,500"></dx-number-box>
+            <p class="form-hint">The tenant is told the request has been resolved.</p>
+            <div class="form-actions">
+                <dx-button text="Cancel" stylingMode="text" (onClick)="resolveFor.set(null)"></dx-button>
+                <dx-button text="Mark resolved" type="default" [disabled]="busy() === t.id" (onClick)="resolve()"></dx-button>
+            </div>
+        </div>
+    }
+</dx-popup>
+
+<dx-popup
+    [visible]="raiseOpen()"
+    (visibleChange)="raiseOpen.set($event)"
+    title="Raise a maintenance request"
+    [width]="440"
+    height="auto"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    <div class="form">
+        @if (isTenant()) {
+            <label>Home</label>
+            <div class="strong">{{ tenantHome()?.label ?? 'No active tenancy' }}</div>
+        } @else {
+            <label>Unit</label>
+            <dx-select-box
+                [items]="units()"
+                valueExpr="id"
+                [displayExpr]="unitText"
+                [searchEnabled]="true"
+                searchMode="contains"
+                [searchExpr]="['name', 'property_name', 'tenant_fname', 'tenant_lname']"
+                placeholder="Search unit, property or tenant"
+                [(value)]="raise.unitId">
+            </dx-select-box>
+        }
+        <label>What's wrong?</label>
+        <dx-text-box [(value)]="raise.title" placeholder="e.g. Leaking kitchen tap" [maxLength]="150"></dx-text-box>
+        <label>Details (optional)</label>
+        <dx-text-area [(value)]="raise.description" [height]="100" placeholder="Where it is, since when, anything the agent should know"></dx-text-area>
+        <div class="form-actions">
+            <dx-button text="Cancel" stylingMode="text" (onClick)="raiseOpen.set(false)"></dx-button>
+            <dx-button text="Send request" type="default" [disabled]="saving()" (onClick)="submitRaise()"></dx-button>
+        </div>
+    </div>
+</dx-popup>

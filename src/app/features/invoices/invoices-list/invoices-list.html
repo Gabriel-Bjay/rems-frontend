@@ -1,0 +1,208 @@
+<div class="page">
+    <div class="page-head head-row">
+        <div>
+            <h1>Invoices</h1>
+            <p>
+                @if (isTenant()) {
+                    Your rent invoices and what has been paid against each one.
+                } @else {
+                    Rent billed to tenants, what has been paid and what is still owed.
+                }
+            </p>
+        </div>
+        @if (isStaff()) {
+            <div class="head-actions">
+                <dx-button
+                    text="Generate invoices"
+                    icon="doc"
+                    type="default"
+                    [disabled]="generating()"
+                    (onClick)="generate()">
+                </dx-button>
+            </div>
+        }
+    </div>
+
+    @let s = stats();
+    <div class="stats">
+        <div class="card stat">
+            <div class="stat-label">Outstanding</div>
+            <div class="stat-value">{{ money(s.outstanding) }}</div>
+            <div class="stat-sub">{{ s.openCount }} open invoice{{ s.openCount === 1 ? '' : 's' }}</div>
+        </div>
+        <div class="card stat">
+            <div class="stat-label">Overdue</div>
+            <div class="stat-value" [class.warn]="s.overdue > 0">{{ money(s.overdue) }}</div>
+            <div class="stat-sub">{{ s.overdueCount }} past the due date</div>
+        </div>
+        <div class="card stat">
+            <div class="stat-label">Billed this month</div>
+            <div class="stat-value">{{ money(s.billed) }}</div>
+            <div class="stat-sub">
+                @if (s.paidShare !== null) {
+                    {{ s.paidShare }}% already paid
+                } @else {
+                    Nothing billed yet
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        @for (f of filters; track f.value) {
+            <button type="button" class="tab" [class.active]="filter() === f.value" (click)="setFilter(f.value)">
+                {{ f.text }} <span class="count">{{ counts()[f.value] }}</span>
+            </button>
+        }
+    </div>
+
+    <div class="grid-card">
+        <dx-data-grid
+            [dataSource]="rows()"
+            keyExpr="id"
+            [showBorders]="false"
+            [columnAutoWidth]="true"
+            [hoverStateEnabled]="true"
+            [noDataText]="loading() ? 'Loading invoices…' : 'No invoices here.'"
+            (onRowClick)="open($event.data)">
+
+            <dxo-search-panel [visible]="true" [width]="260" placeholder="Search tenant, unit, invoice…"></dxo-search-panel>
+            <dxo-paging [pageSize]="12"></dxo-paging>
+            <dxo-pager [visible]="true" [showInfo]="true" infoText="Showing {2} invoices"></dxo-pager>
+            <dxo-sorting mode="single"></dxo-sorting>
+
+            <dxo-toolbar>
+                <dxi-item location="before" template="titleTemplate"></dxi-item>
+                <dxi-item name="searchPanel" location="after"></dxi-item>
+            </dxo-toolbar>
+            <div *dxTemplate="let _ of 'titleTemplate'" class="grid-title">
+                {{ rows().length }} invoice{{ rows().length === 1 ? '' : 's' }}
+            </div>
+
+            <dxi-column caption="Invoice" [calculateCellValue]="numberOf" cellTemplate="numberCell"></dxi-column>
+            <div *dxTemplate="let cell of 'numberCell'">
+                <div class="cell-main">{{ cell.value }}</div>
+                <div class="cell-sub">{{ period(cell.data.period_start) }}</div>
+            </div>
+
+            <dxi-column caption="Tenant" [calculateCellValue]="tenantOf" cellTemplate="tenantCell" [visible]="!isTenant()"></dxi-column>
+            <div *dxTemplate="let cell of 'tenantCell'" class="person-cell">
+                <div class="pa">{{ initials(cell.value) }}</div>
+                <div>
+                    <div class="pn">{{ cell.value }}</div>
+                    <div class="cell-sub">{{ cell.data.unit_name }} · {{ cell.data.property_name }}</div>
+                </div>
+            </div>
+
+            <dxi-column caption="Home" [calculateCellValue]="unitOf" [visible]="isTenant()"></dxi-column>
+
+            <dxi-column dataField="due_date" caption="Due" dataType="date" sortOrder="desc" cellTemplate="dueCell"></dxi-column>
+            <div *dxTemplate="let cell of 'dueCell'">
+                <div>{{ shortDate(cell.data.due_date) }}</div>
+                @if (daysLate(cell.data) > 0) {
+                    <div class="cell-sub late">{{ daysLate(cell.data) }} day{{ daysLate(cell.data) === 1 ? '' : 's' }} late</div>
+                }
+            </div>
+
+            <dxi-column dataField="total_amount" caption="Amount" dataType="number" alignment="right" [customizeText]="moneyText"></dxi-column>
+            <dxi-column dataField="amount_paid" caption="Paid" dataType="number" alignment="right" [customizeText]="moneyText"></dxi-column>
+            <dxi-column dataField="balance" caption="Balance" dataType="number" alignment="right" cellTemplate="balanceCell"></dxi-column>
+            <div *dxTemplate="let cell of 'balanceCell'">
+                <span class="amount" [class.warn]="cell.data.status === 'overdue' && cell.value > 0">{{ money(cell.value) }}</span>
+            </div>
+
+            <dxi-column caption="Status" [calculateCellValue]="statusOf" cellTemplate="statusCell" alignment="center"></dxi-column>
+            <div *dxTemplate="let cell of 'statusCell'">
+                <span class="chip {{ cell.data.status }}">{{ cell.value }}</span>
+            </div>
+        </dx-data-grid>
+    </div>
+</div>
+
+<dx-popup
+    [visible]="!!selected()"
+    (onHidden)="close()"
+    [title]="selected() ? invoiceNo(selected()!.id) : ''"
+    [width]="540"
+    height="auto"
+    maxHeight="90vh"
+    [showCloseButton]="true"
+    [hideOnOutsideClick]="true">
+    @if (selected(); as inv) {
+        <div class="invoice-detail">
+            <div class="detail-head">
+                <div>
+                    <div class="detail-title">{{ period(inv.period_start) }} rent</div>
+                    <div class="muted small">
+                        {{ personName(inv.tenant_fname, inv.tenant_lname) }} · {{ inv.unit_name }}, {{ inv.property_name }}
+                    </div>
+                </div>
+                <span class="chip {{ inv.status }}">{{ label(inv.status) }}</span>
+            </div>
+
+            <dl class="facts">
+                <div><dt>Billing period</dt><dd>{{ shortDate(inv.period_start) }} – {{ shortDate(inv.period_end) }}</dd></div>
+                <div><dt>Issued</dt><dd>{{ shortDate(inv.issue_date) }}</dd></div>
+                <div>
+                    <dt>Due</dt>
+                    <dd [class.warn]="inv.status === 'overdue'">
+                        {{ shortDate(inv.due_date) }}
+                        @if (daysLate(inv) > 0) { · {{ daysLate(inv) }} days late }
+                    </dd>
+                </div>
+            </dl>
+
+            <div class="section-label">Charges</div>
+            @if (detailLoading()) {
+                <div class="empty-note">Loading…</div>
+            } @else {
+                <table class="lines">
+                    @for (item of inv.items ?? []; track item.id) {
+                        <tr><td>{{ item.description }}</td><td>{{ money(item.amount) }}</td></tr>
+                    }
+                    <tr class="total"><td>Total</td><td>{{ money(inv.total_amount) }}</td></tr>
+                </table>
+
+                <div class="section-label">Payments applied</div>
+                @for (a of inv.allocations ?? []; track a.id) {
+                    <div class="alloc">
+                        <span class="method {{ a.method }}">{{ methodLabel(a.method) }}</span>
+                        <span class="grow">
+                            {{ shortDate(a.paid_at) }}
+                            <span class="muted small">· {{ a.gateway_reference ?? 'no reference' }}</span>
+                        </span>
+                        <span class="amount">{{ money(a.amount_applied) }}</span>
+                    </div>
+                } @empty {
+                    <div class="empty-note">Nothing has been paid against this invoice yet.</div>
+                }
+
+                <div class="total-line">
+                    <span>Balance</span>
+                    <span [class.warn]="inv.balance > 0">{{ money(inv.balance) }}</span>
+                </div>
+            }
+
+            @if (inv.status === 'void') {
+                <div class="note">Voided{{ inv.void_reason ? ': ' + inv.void_reason : '' }}</div>
+            }
+
+            @if (canVoid(inv) && !detailLoading()) {
+                @if (voidOpen()) {
+                    <div class="form void-form">
+                        <label>Why is this invoice being voided?</label>
+                        <dx-text-area [(value)]="voidReason" [height]="80" placeholder="e.g. Billed for the wrong unit"></dx-text-area>
+                        <div class="form-actions">
+                            <dx-button text="Keep invoice" stylingMode="text" (onClick)="voidOpen.set(false)"></dx-button>
+                            <dx-button text="Void invoice" type="danger" [disabled]="voiding()" (onClick)="confirmVoid()"></dx-button>
+                        </div>
+                    </div>
+                } @else {
+                    <div class="form-actions">
+                        <dx-button text="Void invoice" stylingMode="outlined" type="danger" (onClick)="startVoid()"></dx-button>
+                    </div>
+                }
+            }
+        </div>
+    }
+</dx-popup>

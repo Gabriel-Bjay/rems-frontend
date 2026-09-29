@@ -1,7 +1,7 @@
 <div class="page">
     <div class="page-head">
         <h1>Tenancies</h1>
-        <p>Manage rental agreements between tenants and units.</p>
+        <p>Manage rental agreements between tenants and units. Activating a draft opens the deposit and issues the first invoice.</p>
     </div>
 
     <div class="grid-card">
@@ -27,9 +27,9 @@
 
             <dxo-editing
                 mode="popup"
-                [allowAdding]="true"
-                [allowUpdating]="true"
-                [allowDeleting]="true"
+                [allowAdding]="isStaff()"
+                [allowUpdating]="isStaff()"
+                [allowDeleting]="isStaff()"
                 [useIcons]="true">
 
                 <dxo-texts addRow="Add tenancy"></dxo-texts>
@@ -126,12 +126,37 @@
             <dxi-column
                 dataField="status"
                 caption="Status"
+                cellTemplate="statusCell"
+                alignment="center"
                 [allowEditing]="false">
 
                 <dxo-lookup
                     [dataSource]="statuses">
                 </dxo-lookup>
 
+            </dxi-column>
+
+            <div *dxTemplate="let cell of 'statusCell'">
+                <span class="chip {{ cell.data.status }}">{{ label(cell.data.status) }}</span>
+            </div>
+
+            <dxi-column type="buttons" [visible]="isStaff()" [width]="150">
+                <dxi-button
+                    text="Activate"
+                    hint="Start the lease: opens the deposit and issues the first invoice"
+                    cssClass="lease-action"
+                    [visible]="canActivate"
+                    [onClick]="activate">
+                </dxi-button>
+                <dxi-button
+                    text="End"
+                    hint="End the lease and mark the unit vacant"
+                    cssClass="lease-action end"
+                    [visible]="canEnd"
+                    [onClick]="end">
+                </dxi-button>
+                <dxi-button name="edit"></dxi-button>
+                <dxi-button name="delete"></dxi-button>
             </dxi-column>
 
         </dx-data-grid>

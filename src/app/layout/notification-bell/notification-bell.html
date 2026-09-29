@@ -1,0 +1,38 @@
+<button type="button" class="bell" [class.open]="open()" (click)="toggle()"
+    [attr.aria-label]="unread() ? unread() + ' unread notifications' : 'Notifications'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path [attr.d]="bellIcon" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+    @if (unread()) {
+        <span class="badge">{{ unread() > 9 ? '9+' : unread() }}</span>
+    }
+</button>
+
+@if (open()) {
+    <div class="backdrop" (click)="open.set(false)"></div>
+    <div class="panel">
+        <div class="head">
+            <span>Notifications</span>
+            @if (unread()) {
+                <button type="button" class="link" (click)="markAllRead()">Mark all as read</button>
+            }
+        </div>
+        <div class="list">
+            @for (n of notifications(); track n.id) {
+                <button type="button" class="item" [class.unread]="!n.is_read" (click)="select(n)">
+                    <span class="icon {{ n.event_type }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path [attr.d]="eventIcon(n.event_type)" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </span>
+                    <span class="text">
+                        <span class="msg">{{ n.message }}</span>
+                        <span class="time">{{ timeAgo(n.created_at) }}</span>
+                    </span>
+                </button>
+            } @empty {
+                <div class="empty">You're all caught up.</div>
+            }
+        </div>
+    </div>
+}

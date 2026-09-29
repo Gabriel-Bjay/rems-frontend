@@ -9,17 +9,19 @@
             </div>
         </div>
 
-        <div class="nav-label">Main</div>
-        <nav class="nav">
-            @for (item of nav(); track item.route) {
-                <a [routerLink]="item.route" routerLinkActive="active">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path [attr.d]="item.icon" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    {{ item.label }}
-                </a>
-            }
-        </nav>
+        @for (group of nav(); track group.section) {
+            <div class="nav-label">{{ group.section }}</div>
+            <nav class="nav">
+                @for (item of group.items; track item.route) {
+                    <a [routerLink]="item.route" routerLinkActive="active" [attr.title]="item.label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path [attr.d]="item.icon" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        {{ item.label }}
+                    </a>
+                }
+            </nav>
+        }
 
         <div class="spacer"></div>
 
@@ -35,6 +37,7 @@
     <div class="main">
         <header class="topbar">
             <div class="t-spacer"></div>
+            <app-notification-bell></app-notification-bell>
             <dx-button text="Logout" stylingMode="text" (onClick)="onLogout()"></dx-button>
         </header>
         <main class="content-area">
