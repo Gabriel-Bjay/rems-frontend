@@ -28,6 +28,27 @@
             (onClick)="onLogin()">
         </dx-button>
 
+        @if (demoChecking() || demoAccounts().length) {
+            <div class="demo">
+                <div class="demo-divider"><span>or explore with a demo account</span></div>
+                @if (demoChecking()) {
+                    <p class="demo-wait">Loading demo accounts…</p>
+                } @else {
+                    @for (account of demoAccounts(); track account.role) {
+                        <button type="button" class="demo-btn" [disabled]="loading()" (click)="onDemoLogin(account.role)">
+                            <span class="demo-role">{{ demoRoles[account.role].label }}</span>
+                            <span class="demo-text">
+                                <span class="demo-name">{{ account.name }}</span>
+                                <span class="demo-hint">{{ demoRoles[account.role].hint }}</span>
+                            </span>
+                            <span class="demo-go" aria-hidden="true">&rarr;</span>
+                        </button>
+                    }
+                    <p class="demo-note">Sample data. Changes you make may be seen by other visitors.</p>
+                }
+            </div>
+        }
+
         <!-- Plain href, not routerLink: a full reload here (not a client-side
              route change) so DevExtreme's injected license-notice element
              (appended to <body>, outside Angular's view tree — see below)
