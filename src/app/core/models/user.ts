@@ -13,3 +13,9 @@ export interface LoginResponse {
     token: string;
     user: User;
 }
+
+/** A demo login the API offers while its public demo is switched on. */
+export interface DemoAccount {
+    role: Exclude<Role, 'admin'>;
+    name: string;
+}

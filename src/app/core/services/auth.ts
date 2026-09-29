@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { User, LoginResponse } from '../models/user';
+import { DemoAccount, User, LoginResponse } from '../models/user';
 
 @Injectable({ providedIn: 'root' })
 export class Auth {
@@ -27,10 +27,23 @@ export class Auth {
         const res = await firstValueFrom(
             this.http.post<LoginResponse>(`${environment.apiUrl}/login`, { email, password })
         );
-        localStorage.setItem(this.tokenKey, res.token);
-        localStorage.setItem(this.userKey, JSON.stringify(res.user));
-        this.currentUser.set(res.user);
-        return res.user;
+        return this.startSession(res);
+    }
+
+    // Demo logins the API offers; empty when its public demo is off.
+    async demoAccounts(): Promise<DemoAccount[]> {
+        const res = await firstValueFrom(
+            this.http.get<{ accounts: DemoAccount[] }>(`${environment.apiUrl}/demo-accounts`)
+        );
+        return res.accounts;
+    }
+
+    // Sign in as a demo owner, agent or tenant without a password.
+    async demoLogin(role: DemoAccount['role']): Promise<User> {
+        const res = await firstValueFrom(
+            this.http.post<LoginResponse>(`${environment.apiUrl}/demo-login`, { role })
+        );
+        return this.startSession(res);
     }
 
     async logout(): Promise<void> {
@@ -60,6 +73,13 @@ export class Auth {
 
     getToken(): string | null {
         return localStorage.getItem(this.tokenKey);
+    }
+
+    private startSession(res: LoginResponse): User {
+        localStorage.setItem(this.tokenKey, res.token);
+        localStorage.setItem(this.userKey, JSON.stringify(res.user));
+        this.currentUser.set(res.user);
+        return res.user;
     }
 
     clearSession(): void {
