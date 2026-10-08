@@ -1,6 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DxTextBoxModule, DxButtonModule } from 'devextreme-angular';
+import { TextEditorButton } from 'devextreme/common';
+import { ClickEvent } from 'devextreme/ui/button';
+import dxButton from 'devextreme/ui/button';
 import { Auth } from '../../../core/services/auth';
 import { DemoAccount } from '../../../core/models/user';
 
@@ -9,6 +12,10 @@ const DEMO_ROLES: Record<DemoAccount['role'], { label: string; hint: string }> =
     agent: { label: 'Agent', hint: 'Units, payments to confirm, repair requests' },
     tenant: { label: 'Tenant', hint: 'Rent due, invoices, payments and repairs' },
 };
+
+// The API sits on a free host that sleeps when idle, so the first request
+// after a quiet spell can take about a minute. Say so once a wait passes this.
+const WAKE_NOTICE_AFTER_MS = 3000;
 
 @Component({
     selector: 'app-login',
@@ -31,6 +38,21 @@ export class Login implements OnInit {
     demoChecking = signal(true);
     readonly demoRoles = DEMO_ROLES;
 
+    private slowRequests = signal(0);
+    serverWaking = computed(() => this.slowRequests() > 0);
+
+    showPassword = signal(false);
+    readonly passwordButtons: TextEditorButton[] = [{
+        name: 'toggle-password',
+        location: 'after',
+        options: {
+            icon: 'eyeopen',
+            stylingMode: 'text',
+            elementAttr: { 'aria-label': 'Show password', 'aria-pressed': 'false' },
+            onClick: (e: ClickEvent) => this.togglePassword(e.component),
+        },
+    }];
+
     ngOnInit() {
         this.loadDemoAccounts();
     }
@@ -40,7 +62,7 @@ export class Login implements OnInit {
         this.loading.set(true);
 
         try {
-            await this.auth.login(this.email, this.password);
+            await this.withWakeNotice(this.auth.login(this.email, this.password));
             this.loading.set(false);
             this.router.navigate(['/app/dashboard']);
         } catch {
@@ -54,7 +76,7 @@ export class Login implements OnInit {
         this.loading.set(true);
 
         try {
-            await this.auth.demoLogin(role);
+            await this.withWakeNotice(this.auth.demoLogin(role));
             this.loading.set(false);
             this.router.navigate(['/app/dashboard']);
         } catch {
@@ -63,9 +85,32 @@ export class Login implements OnInit {
         }
     }
 
+    // One "Show password" button whose pressed state flips, rather than a
+    // label that changes, so screen readers announce it as a toggle.
+    private togglePassword(button: dxButton) {
+        const show = !this.showPassword();
+        this.showPassword.set(show);
+        button.option('icon', show ? 'eyeclose' : 'eyeopen');
+        button.option('elementAttr', { 'aria-label': 'Show password', 'aria-pressed': String(show) });
+    }
+
+    private async withWakeNotice<T>(work: Promise<T>): Promise<T> {
+        let slow = false;
+        const timer = setTimeout(() => {
+            slow = true;
+            this.slowRequests.update(n => n + 1);
+        }, WAKE_NOTICE_AFTER_MS);
+        try {
+            return await work;
+        } finally {
+            clearTimeout(timer);
+            if (slow) this.slowRequests.update(n => n - 1);
+        }
+    }
+
     private async loadDemoAccounts() {
         try {
-            this.demoAccounts.set(await this.auth.demoAccounts());
+            this.demoAccounts.set(await this.withWakeNotice(this.auth.demoAccounts()));
         } catch {
             // No demo on this deployment; the sign-in form still works.
         } finally {

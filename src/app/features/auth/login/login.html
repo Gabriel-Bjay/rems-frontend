@@ -10,15 +10,31 @@
 
         <h2>Sign in to your account</h2>
 
-        <label>Email</label>
-        <dx-text-box [(value)]="email" placeholder="you@example.com" mode="email"></dx-text-box>
+        <label for="login-email">Email</label>
+        <dx-text-box
+            [(value)]="email"
+            placeholder="you@example.com"
+            mode="email"
+            [inputAttr]="{ id: 'login-email', autocomplete: 'email' }"
+            (onEnterKey)="onLogin()">
+        </dx-text-box>
 
-        <label>Password</label>
-        <dx-text-box [(value)]="password" placeholder="Your password" mode="password"></dx-text-box>
+        <label for="login-password">Password</label>
+        <dx-text-box
+            [(value)]="password"
+            placeholder="Your password"
+            [mode]="showPassword() ? 'text' : 'password'"
+            [buttons]="passwordButtons"
+            [inputAttr]="{ id: 'login-password', autocomplete: 'current-password' }"
+            (onEnterKey)="onLogin()">
+        </dx-text-box>
 
         @if (errorMessage()) {
             <p class="error" role="alert">{{ errorMessage() }}</p>
         }
+
+        <!-- Always in the page, so screen readers announce it when it fills. -->
+        <p class="wake" role="status">@if (serverWaking()) {<span class="wake-dot" aria-hidden="true"></span>Waking up the free server. The first visit after a quiet spell takes about a minute.}</p>
 
         <dx-button
             text="Sign In"

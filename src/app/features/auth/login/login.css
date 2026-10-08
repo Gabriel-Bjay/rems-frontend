@@ -59,6 +59,21 @@
     margin: 12px 0;
 }
 
+.wake {
+    display: flex; gap: 8px; align-items: flex-start;
+    margin: 12px 0 0; padding: 10px 12px;
+    font-size: 12.5px; line-height: 1.45; color: var(--text);
+    background: #fff8f3; border: 1px solid #f3d9c8; border-radius: 10px;
+}
+/* Collapsed rather than display:none, so the live region stays registered. */
+.wake:empty { margin: 0; padding: 0; border: 0; }
+.wake-dot {
+    flex-shrink: 0; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%;
+    background: var(--orange); animation: wake-pulse 1.2s ease-in-out infinite;
+}
+@keyframes wake-pulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .wake-dot { animation: none; } }
+
 .login-card dx-button {
     margin-top: 20px;
 }

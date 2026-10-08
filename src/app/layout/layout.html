@@ -1,13 +1,20 @@
+<!-- A button rather than a #fragment link: with the router, a bare fragment
+     would navigate away from the current page. -->
+<button type="button" class="skip-link" (click)="skipToContent()">Skip to main content</button>
+
 <div class="shell">
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="logo" (click)="goToDash()">R</div>
+    @if (menuOpen()) {
+        <div class="menu-backdrop" (click)="closeMenu()"></div>
+    }
+
+    <aside class="sidebar" id="app-sidebar" [class.open]="menuOpen()">
+        <a class="brand" routerLink="/app/dashboard" aria-label="PRMS dashboard">
+            <div class="logo" aria-hidden="true">R</div>
             <div>
                 <div class="b-name">PRMS</div>
-                
                 <div class="b-sub">Rental Management</div>
             </div>
-        </div>
+        </a>
 
         @for (group of nav(); track group.section) {
             <div class="nav-label">{{ group.section }}</div>
@@ -34,13 +41,25 @@
         </div>
     </aside>
 
-    <div class="main">
+    <div class="main" [attr.inert]="menuOpen() ? '' : null">
         <header class="topbar">
+            <button
+                #menuButton
+                type="button"
+                class="menu-btn"
+                aria-label="Menu"
+                aria-controls="app-sidebar"
+                [attr.aria-expanded]="menuOpen()"
+                (click)="openMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16"></path>
+                </svg>
+            </button>
             <div class="t-spacer"></div>
             <app-notification-bell></app-notification-bell>
             <dx-button text="Logout" stylingMode="text" (onClick)="onLogout()"></dx-button>
         </header>
-        <main class="content-area">
+        <main class="content-area" id="main-content" tabindex="-1" #mainContent>
             <router-outlet></router-outlet>
         </main>
     </div>
