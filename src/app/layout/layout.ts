@@ -1,5 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, DestroyRef, ElementRef, HostListener, computed, inject, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { DxButtonModule } from 'devextreme-angular';
 import { Auth } from '../core/services/auth';
 import { Role } from '../core/models/user';
@@ -12,6 +14,9 @@ interface NavItem {
     roles: Role[];
     section: 'Overview' | 'Money' | 'Portfolio' | 'People';
 }
+
+// Below this width the sidebar becomes a slide-out menu; matches layout.css.
+const PHONE_QUERY = '(max-width: 600px)';
 
 const EVERYONE: Role[] = ['admin', 'owner', 'agent', 'tenant'];
 const STAFF_AND_OWNERS: Role[] = ['admin', 'owner', 'agent'];
@@ -59,8 +64,44 @@ export class Layout {
         return (letters || '?').toUpperCase();
     });
 
-    goToDash(){
-      this.router.navigate(['/app/dashboard'])
+    menuOpen = signal(false);
+    private menuButton = viewChild.required<ElementRef<HTMLButtonElement>>('menuButton');
+    private mainContent = viewChild.required<ElementRef<HTMLElement>>('mainContent');
+    private host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+    constructor() {
+        // Picking a page closes the phone menu.
+        this.router.events
+            .pipe(filter(e => e instanceof NavigationEnd), takeUntilDestroyed())
+            .subscribe(() => this.closeMenu(false));
+
+        // Widening past phone size shows the sidebar inline, so drop the menu state.
+        const phone = window.matchMedia(PHONE_QUERY);
+        const onChange = (e: MediaQueryListEvent) => { if (!e.matches) this.closeMenu(false); };
+        phone.addEventListener('change', onChange);
+        inject(DestroyRef).onDestroy(() => phone.removeEventListener('change', onChange));
+    }
+
+    openMenu() {
+        this.menuOpen.set(true);
+        // Move focus into the menu once it has rendered.
+        setTimeout(() => this.host.nativeElement.querySelector<HTMLElement>('#app-sidebar a')?.focus());
+    }
+
+    closeMenu(returnFocus = true) {
+        if (!this.menuOpen()) return;
+        this.menuOpen.set(false);
+        // Wait for the page behind to lose `inert`, or the button can't take focus.
+        if (returnFocus) setTimeout(() => this.menuButton().nativeElement.focus());
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape() {
+        this.closeMenu();
+    }
+
+    skipToContent() {
+        this.mainContent().nativeElement.focus();
     }
 
     onLogout() {
